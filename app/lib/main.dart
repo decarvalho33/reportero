@@ -21,11 +21,39 @@ class ReportForm extends StatefulWidget {
 }
 
 class _ReportFormState extends State<ReportForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _titleController = TextEditingController();
+  final _descController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Nova Denúncia')),
-      body: const Center(child: Text('Formulário em construção...')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _titleController,
+                decoration: const InputDecoration(labelText: 'Título da Ocorrência'),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _descController,
+                decoration: const InputDecoration(labelText: 'Descrição detalhada'),
+                maxLines: 3,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {}, // Ainda sem ação
+                child: const Text('Enviar Denúncia'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
