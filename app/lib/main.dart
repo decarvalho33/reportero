@@ -25,6 +25,17 @@ class _ReportFormState extends State<ReportForm> {
   final _titleController = TextEditingController();
   final _descController = TextEditingController();
 
+
+void _submitData() {
+  if (_formKey.currentState!.validate()) {
+    // Simulação de envio
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Processando denúncia...')),
+    );
+    print("Título: ${_titleController.text}");
+  }
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,16 +49,18 @@ class _ReportFormState extends State<ReportForm> {
               TextFormField(
                 controller: _titleController,
                 decoration: const InputDecoration(labelText: 'Título da Ocorrência'),
+                validator: (value) => value!.isEmpty ? 'Por favor, insira um título' : null,
               ),
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descController,
                 decoration: const InputDecoration(labelText: 'Descrição detalhada'),
                 maxLines: 3,
+                validator: (value) => value!.isEmpty ? 'A descrição é obrigatória' : null,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {}, // Ainda sem ação
+                onPressed: _submitData,
                 child: const Text('Enviar Denúncia'),
               ),
             ],
