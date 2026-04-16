@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/denuncia.dart';
+import '../services/denuncia_service.dart';
 
 class DenunciaViewModel {
   final formKey = GlobalKey<FormState>();
-  
+
+  final _service = DenunciaService();
+
   // Controllers que a View vai usar
   final tituloCtrl = TextEditingController();
   final localCtrl = TextEditingController();
@@ -26,9 +29,14 @@ class DenunciaViewModel {
         descricao: descCtrl.text,
         autor: autorCtrl.text.isEmpty ? "Anônimo" : autorCtrl.text,
       );
-      
-      debugPrint("Simulando envio ao Service: ${novaDenuncia.titulo}");
-      return true; // Sucesso na validação/processamento
+      try {
+        // chamada real para o serviço de envio
+        await _service.enviarDenuncia(novaDenuncia);
+        return true;
+      } catch (e) {
+        debugPrint("Erro ao processar no backend: $e");
+        return false;
+      }
     }
     return false;
   }
