@@ -1,19 +1,17 @@
 import '../models/denuncia.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Este serviço simula o envio de uma denúncia para um servidor
+// Este serviço será responsável por toda a comunicação com o backend (Supabase) relacionada às denúncias.
 class DenunciaService {
+  final _supabase = Supabase.instance.client;
   Future<void> enviarDenuncia(Denuncia denuncia) async {
-    // simula o envio da denúncia para um servidor
+    // Enviar a denúncia para o Supabase
     try {
-      final dados = denuncia.toJson();
-
-      print("BACKEND LOG");
-      print("JSON estruturado para envio: $dados");
-
-      await Future.delayed(Duration(seconds: 1)); // Simula o tempo de envio
-      print("Denúncia enviada com sucesso!");
+      await _supabase.from('denuncias').insert(denuncia.toJson());
+      print("Denúncia enviada com sucesso!"); // Log de sucesso (teste)
     } catch (e) {
-      print("Erro ao enviar denúncia: $e");
+      print("Erro ao enviar denúncia: $e"); // Log de erro (teste)
+      rethrow;
     }
   }
 }
