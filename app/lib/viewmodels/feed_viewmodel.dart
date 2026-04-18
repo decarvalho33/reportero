@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/denuncia.dart';
+import '../services/denuncia_service.dart';
 
 class FeedViewModel extends ChangeNotifier {
+  
+  final _service = DenunciaService();
+  
   List<Denuncia> _denuncias = [];
   bool _isLoading = false;
   String? _erro;
@@ -16,34 +20,12 @@ class FeedViewModel extends ChangeNotifier {
     _erro = null;
     notifyListeners();
 
-    await Future.delayed(const Duration(milliseconds: 600)); // simula latência
-
-    _denuncias = [
-      Denuncia(
-        id: '1',
-        titulo: 'Poste caído no IC-3',
-        descricao: 'Fio exposto na calçada próximo à entrada do instituto. Risco para pedestres.',
-        localizacao: 'Instituto de Computação',
-        autor: 'Anônimo',
-        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      Denuncia(
-        id: '2',
-        titulo: 'Banco quebrado no CB',
-        descricao: 'Banco da área de convivência com estrutura comprometida, pode machucar alguém.',
-        localizacao: 'Centro de Biologia',
-        autor: 'Maria S.',
-        createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-      ),
-      Denuncia(
-        id: '3',
-        titulo: 'Lâmpada queimada no banheiro',
-        descricao: 'Banheiro masculino do 2º andar completamente sem luz há três dias.',
-        localizacao: 'Biblioteca Central',
-        autor: 'Anônimo',
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-    ];
+    try {
+      _denuncias = await _service.obtenerDenuncias();
+    } catch (e) {
+      _erro = "Erro ao carregar denúncias";
+      debugPrint("Erro: $e");
+    }
 
     _isLoading = false;
     notifyListeners();
@@ -56,4 +38,5 @@ class FeedViewModel extends ChangeNotifier {
     if (diff.inHours < 24) return 'há ${diff.inHours}h';
     return 'há ${diff.inDays}d';
   }
+
 }
