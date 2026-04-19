@@ -1,20 +1,23 @@
 import '../models/denuncia.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-// Este serviço será responsável por toda a comunicação com o backend (Supabase) relacionada às denúncias.
 class DenunciaService {
   final _supabase = Supabase.instance.client;
+
+ 
   Future<void> enviarDenuncia(Denuncia denuncia) async {
-    // Enviar a denúncia para o Supabase
     try {
       await _supabase.from('denuncias').insert(denuncia.toJson());
-      print("Denúncia enviada com sucesso!"); // Log de sucesso (teste)
+
+      print("BACKEND LOG");
+      print("Denúncia enviada com sucesso!");
     } catch (e) {
-      print("Erro ao enviar denúncia: $e"); // Log de erro (teste)
+      print("Erro ao enviar denúncia: $e");
       rethrow;
     }
   }
 
+  
   Future<List<Denuncia>> obtenerDenuncias() async {
     try {
       final response = await _supabase
@@ -30,5 +33,4 @@ class DenunciaService {
       rethrow;
     }
   }
-
 }
