@@ -48,11 +48,12 @@ jobs:
       - name: Iniciar Supabase local (Docker)
         run: supabase start
 
-      - name: Exportar credenciais do Supabase local
+      - name: Diagnostico - status e conectividade
         run: |
-          echo "SUPABASE_URL=http://localhost:54321" >> $GITHUB_ENV
-          echo "SUPABASE_ANON_KEY=$(supabase status | grep 'anon key' | awk '{print $NF}')" >> $GITHUB_ENV
-          echo "SUPABASE_SERVICE_ROLE_KEY=$(supabase status | grep 'service_role key' | awk '{print $NF}')" >> $GITHUB_ENV
+          supabase status
+          curl -s http://localhost:54321/rest/v1/denuncias \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRFA0NiK7urOL79dnpaqQ9eTuM59cLEH4m9IuJLBLc" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRFA0NiK7urOL79dnpaqQ9eTuM59cLEH4m9IuJLBLc"
 
       - name: Executar testes unitários e de widget
         working-directory: app

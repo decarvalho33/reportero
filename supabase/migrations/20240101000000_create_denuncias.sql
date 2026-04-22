@@ -18,3 +18,7 @@ USING (true);
 CREATE POLICY "Inserção pública de denuncias"
 ON denuncias FOR INSERT
 WITH CHECK (true);
+
+CREATE POLICY "Deleção pública de denuncias"
+ON denuncias FOR DELETE
+USING (true);

@@ -1,41 +1,30 @@
-import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app/models/denuncia.dart';
 import 'package:app/services/denuncia_service.dart';
 
-// Lidas do ambiente (exportadas pelo CI via `supabase status`)
-// com fallback para os defaults do Supabase local
-String get _supabaseUrl =>
-    Platform.environment['SUPABASE_URL'] ?? 'http://localhost:54321';
-String get _supabaseAnonKey =>
-    Platform.environment['SUPABASE_ANON_KEY'] ??
+// Credenciais padrão do Supabase local (supabase start)
+const _supabaseUrl = 'http://localhost:54321';
+const _supabaseAnonKey =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRFA0NiK7urOL79dnpaqQ9eTuM59cLEH4m9IuJLBLc';
-// Service role bypassa RLS — usado apenas no setup/teardown dos testes
-String get _serviceRoleKey =>
-    Platform.environment['SUPABASE_SERVICE_ROLE_KEY'] ??
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hj04zWl196z2-SB68';
 
 void main() {
   late DenunciaService service;
-  late SupabaseClient adminClient;
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     SharedPreferences.setMockInitialValues({});
     await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
-    // Cliente admin separado para operações de limpeza que precisam bypassar RLS
-    adminClient = SupabaseClient(_supabaseUrl, _serviceRoleKey);
     service = DenunciaService();
   });
 
   setUp(() async {
-    await adminClient.from('denuncias').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await Supabase.instance.client.from('denuncias').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   });
 
   tearDown(() async {
-    await adminClient.from('denuncias').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await Supabase.instance.client.from('denuncias').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   });
 
   group('DenunciaService', () {
