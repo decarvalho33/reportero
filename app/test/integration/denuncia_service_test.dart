@@ -8,23 +8,29 @@ import 'package:app/services/denuncia_service.dart';
 const _supabaseUrl = 'http://localhost:54321';
 const _supabaseAnonKey =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRFA0NiK7urOL79dnpaqQ9eTuM59cLEH4m9IuJLBLc';
+// Service role bypassa RLS — usado apenas no setup/teardown dos testes
+const _serviceRoleKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hj04zWl196z2-SB68';
 
 void main() {
   late DenunciaService service;
+  late SupabaseClient adminClient;
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     SharedPreferences.setMockInitialValues({});
     await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
+    // Cliente admin separado para operações de limpeza que precisam bypassar RLS
+    adminClient = SupabaseClient(_supabaseUrl, _serviceRoleKey);
     service = DenunciaService();
   });
 
   setUp(() async {
-    await Supabase.instance.client.from('denuncias').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await adminClient.from('denuncias').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   });
 
   tearDown(() async {
-    await Supabase.instance.client.from('denuncias').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await adminClient.from('denuncias').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   });
 
   group('DenunciaService', () {
