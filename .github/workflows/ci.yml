@@ -46,7 +46,13 @@ jobs:
             | tar -xz -C /usr/local/bin supabase
 
       - name: Iniciar Supabase local (Docker)
-        run: supabase start --ignore-health-check
+        run: supabase start
+
+      - name: Exportar credenciais do Supabase local
+        run: |
+          echo "SUPABASE_URL=http://localhost:54321" >> $GITHUB_ENV
+          echo "SUPABASE_ANON_KEY=$(supabase status | grep 'anon key' | awk '{print $NF}')" >> $GITHUB_ENV
+          echo "SUPABASE_SERVICE_ROLE_KEY=$(supabase status | grep 'service_role key' | awk '{print $NF}')" >> $GITHUB_ENV
 
       - name: Executar testes unitários e de widget
         working-directory: app

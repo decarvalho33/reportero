@@ -1,15 +1,20 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app/models/denuncia.dart';
 import 'package:app/services/denuncia_service.dart';
 
-// Credenciais padrão do Supabase local (supabase start)
-const _supabaseUrl = 'http://localhost:54321';
-const _supabaseAnonKey =
+// Lidas do ambiente (exportadas pelo CI via `supabase status`)
+// com fallback para os defaults do Supabase local
+String get _supabaseUrl =>
+    Platform.environment['SUPABASE_URL'] ?? 'http://localhost:54321';
+String get _supabaseAnonKey =>
+    Platform.environment['SUPABASE_ANON_KEY'] ??
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRFA0NiK7urOL79dnpaqQ9eTuM59cLEH4m9IuJLBLc';
 // Service role bypassa RLS — usado apenas no setup/teardown dos testes
-const _serviceRoleKey =
+String get _serviceRoleKey =>
+    Platform.environment['SUPABASE_SERVICE_ROLE_KEY'] ??
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hj04zWl196z2-SB68';
 
 void main() {
