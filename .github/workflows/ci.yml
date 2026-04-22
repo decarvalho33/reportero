@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main, "feature/**", "improvement/**", "fix/**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Instalar dependências
+        working-directory: app
+        run: flutter pub get
+
+      - name: Compilar aplicação (web)
+        working-directory: app
+        run: flutter build web --release
+
+  test:
+    name: Testes Automatizados
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Instalar dependências
+        working-directory: app
+        run: flutter pub get
+
+      - name: Instalar Supabase CLI
+        run: |
+          curl -fsSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz \
+            | tar -xz -C /usr/local/bin supabase
+
+      - name: Iniciar Supabase local (Docker)
+        run: supabase start --ignore-health-check
+
+      - name: Executar testes unitários e de widget
+        working-directory: app
+        run: flutter test test/models test/viewmodels test/widget_test.dart
+
+      - name: Executar testes de integração
+        working-directory: app
+        run: flutter test test/integration
+
+      - name: Parar Supabase local
+        if: always()
+        run: supabase stop
