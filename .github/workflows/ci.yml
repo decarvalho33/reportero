@@ -40,27 +40,6 @@ jobs:
         working-directory: app
         run: flutter pub get
 
-      - uses: supabase/setup-cli@v1
-        with:
-          version: latest
-
-      - name: Regenerar config Supabase e restaurar migrations
-        run: |
-          cp -r supabase/migrations /tmp/sb_migrations
-          rm -rf supabase
-          supabase init
-          cp /tmp/sb_migrations/* supabase/migrations/
-
-      - name: Iniciar Supabase local (Docker)
-        run: supabase start
-
-      - name: Exportar credenciais e recarregar schema
-        run: |
-          ANON_KEY=$(supabase status | grep -o 'sb_publishable_[A-Za-z0-9_-]*')
-          echo "SUPABASE_ANON_KEY=${ANON_KEY}" >> $GITHUB_ENV
-          docker exec $(docker ps --filter "name=supabase_db" --format "{{.Names}}" | head -1) \
-            psql -U postgres -c "NOTIFY pgrst, 'reload schema'"
-
       - name: Executar testes unitários e de widget
         working-directory: app
         run: flutter test test/models test/viewmodels test/widget_test.dart
@@ -68,7 +47,3 @@ jobs:
       - name: Executar testes de integração
         working-directory: app
         run: flutter test test/integration
-
-      - name: Parar Supabase local
-        if: always()
-        run: supabase stop
