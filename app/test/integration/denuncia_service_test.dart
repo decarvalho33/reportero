@@ -5,7 +5,8 @@ import 'package:app/models/denuncia.dart';
 import 'package:app/services/denuncia_service.dart';
 
 const _supabaseUrl = 'https://wfxugctznmathcwqsgkt.supabase.co';
-const _supabaseAnonKey = 'sb_publishable_0oky8MUfBNMLsGLIxOlBuw_pa7uES7X';
+const _supabaseAnonKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmeHVnY3R6bm1hdGhjd3FzZ2t0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjEwOTIsImV4cCI6MjA5MjUzNzA5Mn0.CFdzBSEQXcQ-pQnN1J_gum_ynzB1BO4aHO_axg28T14';
 
 Future<void> _limparTabela() async {
   await Supabase.instance.client
