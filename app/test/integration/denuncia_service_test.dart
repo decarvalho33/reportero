@@ -1,15 +1,31 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:postgres/postgres.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app/models/denuncia.dart';
 import 'package:app/services/denuncia_service.dart';
 
-// Lidas do ambiente (exportadas pelo CI via `supabase status`)
 String get _supabaseUrl =>
     Platform.environment['SUPABASE_URL'] ?? 'http://localhost:54321';
 String get _supabaseAnonKey =>
     Platform.environment['SUPABASE_ANON_KEY'] ?? '';
+
+// Limpa a tabela via conexão direta ao PostgreSQL (sem depender de PostgREST ou JWT)
+Future<void> _truncarTabela() async {
+  final conn = await Connection.open(
+    Endpoint(
+      host: '127.0.0.1',
+      port: 54322,
+      database: 'postgres',
+      username: 'postgres',
+      password: 'postgres',
+    ),
+    settings: const ConnectionSettings(sslMode: SslMode.disable),
+  );
+  await conn.execute('TRUNCATE TABLE public.denuncias');
+  await conn.close();
+}
 
 void main() {
   late DenunciaService service;
@@ -21,13 +37,9 @@ void main() {
     service = DenunciaService();
   });
 
-  setUp(() async {
-    await Supabase.instance.client.from('denuncias').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-  });
+  setUp(() async => _truncarTabela());
 
-  tearDown(() async {
-    await Supabase.instance.client.from('denuncias').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-  });
+  tearDown(() async => _truncarTabela());
 
   group('DenunciaService', () {
     test('obtenerDenuncias retorna lista vazia quando banco está limpo', () async {
