@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -25,6 +26,7 @@ void main() {
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
+    HttpOverrides.global = null; // allow real HTTP — TestWidgetsFlutterBinding blocks it by default
     SharedPreferences.setMockInitialValues({});
     await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
     // Verify REST connectivity before running tests
