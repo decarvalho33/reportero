@@ -16,7 +16,7 @@ Future<void> _limparTabela() async {
         .neq('id', '00000000-0000-0000-0000-000000000000');
   } catch (e) {
     // ignore: table may be empty or cleanup failed - tests will still run
-    debugPrint('_limparTabela: $e');
+    print('_limparTabela: $e');
   }
 }
 
