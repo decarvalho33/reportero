@@ -1,13 +1,15 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app/models/denuncia.dart';
 import 'package:app/services/denuncia_service.dart';
 
-// Credenciais padrão do Supabase local (supabase start)
-const _supabaseUrl = 'http://localhost:54321';
-const _supabaseAnonKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRFA0NiK7urOL79dnpaqQ9eTuM59cLEH4m9IuJLBLc';
+// Lidas do ambiente (exportadas pelo CI via `supabase status`)
+String get _supabaseUrl =>
+    Platform.environment['SUPABASE_URL'] ?? 'http://localhost:54321';
+String get _supabaseAnonKey =>
+    Platform.environment['SUPABASE_ANON_KEY'] ?? '';
 
 void main() {
   late DenunciaService service;
