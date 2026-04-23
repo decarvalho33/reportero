@@ -40,19 +40,12 @@ jobs:
         working-directory: app
         run: flutter pub get
 
-      - name: Instalar Supabase CLI
-        run: |
-          curl -fsSL https://github.com/supabase/cli/releases/latest/download/supabase_linux_amd64.tar.gz \
-            | tar -xz -C /usr/local/bin supabase
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 1.200.3
 
       - name: Iniciar Supabase local (Docker)
         run: supabase start
-
-      - name: Exportar credenciais do Supabase local
-        run: |
-          ANON_KEY=$(supabase status | grep -o 'sb_publishable_[A-Za-z0-9_-]*')
-          echo "SUPABASE_URL=http://localhost:54321" >> $GITHUB_ENV
-          echo "SUPABASE_ANON_KEY=$ANON_KEY" >> $GITHUB_ENV
 
       - name: Executar testes unitários e de widget
         working-directory: app
