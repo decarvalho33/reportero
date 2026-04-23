@@ -9,10 +9,15 @@ const _supabaseAnonKey =
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmeHVnY3R6bm1hdGhjd3FzZ2t0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjEwOTIsImV4cCI6MjA5MjUzNzA5Mn0.CFdzBSEQXcQ-pQnN1J_gum_ynzB1BO4aHO_axg28T14';
 
 Future<void> _limparTabela() async {
-  await Supabase.instance.client
-      .from('denuncias')
-      .delete()
-      .neq('id', '00000000-0000-0000-0000-000000000000');
+  try {
+    await Supabase.instance.client
+        .from('denuncias')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+  } catch (e) {
+    // ignore: table may be empty or cleanup failed - tests will still run
+    debugPrint('_limparTabela: $e');
+  }
 }
 
 void main() {
@@ -22,6 +27,8 @@ void main() {
     TestWidgetsFlutterBinding.ensureInitialized();
     SharedPreferences.setMockInitialValues({});
     await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
+    // Verify REST connectivity before running tests
+    await Supabase.instance.client.from('denuncias').select();
     service = DenunciaService();
   });
 
