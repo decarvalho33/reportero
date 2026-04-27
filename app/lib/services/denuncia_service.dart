@@ -2,7 +2,7 @@ import '../models/denuncia.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DenunciaService {
-  final _supabase = Supabase.instance.client;
+  SupabaseClient get _supabase => Supabase.instance.client;
 
   Future<void> enviarDenuncia(Denuncia denuncia) async {
     await _supabase.from('denuncias').insert(denuncia.toJson());

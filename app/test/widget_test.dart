@@ -1,30 +1,53 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:app/main.dart';
+import 'package:app/models/denuncia.dart';
+import 'package:app/views/widgets/denuncia_card.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const ReporteroApp());
+  final denunciaBase = Denuncia(
+    id: '1',
+    titulo: 'Buraco na calçada',
+    descricao: 'Grande buraco próximo à entrada do IC-3',
+    localizacao: 'IC-3',
+    autor: 'Maria',
+  );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  Widget buildCard(Denuncia denuncia, {String tempo = 'há 5min'}) {
+    return MaterialApp(
+      home: Scaffold(
+        body: DenunciaCard(denuncia: denuncia, tempoRelativo: tempo),
+      ),
+    );
+  }
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('exibe o título da denúncia', (tester) async {
+    await tester.pumpWidget(buildCard(denunciaBase));
+    expect(find.text('Buraco na calçada'), findsOneWidget);
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('exibe o autor', (tester) async {
+    await tester.pumpWidget(buildCard(denunciaBase));
+    expect(find.text('Maria'), findsOneWidget);
+  });
+
+  testWidgets('exibe a localização', (tester) async {
+    await tester.pumpWidget(buildCard(denunciaBase));
+    expect(find.text('IC-3'), findsOneWidget);
+  });
+
+  testWidgets('exibe o tempo relativo', (tester) async {
+    await tester.pumpWidget(buildCard(denunciaBase, tempo: 'há 2h'));
+    expect(find.text('há 2h'), findsOneWidget);
+  });
+
+  testWidgets('exibe "Anônimo" quando autor está vazio', (tester) async {
+    final denunciaAnonima = Denuncia(
+      titulo: 'Lâmpada queimada',
+      descricao: 'Corredor sem luz',
+      localizacao: 'CB',
+      autor: '',
+    );
+    await tester.pumpWidget(buildCard(denunciaAnonima));
+    expect(find.text('Anônimo'), findsOneWidget);
   });
 }
