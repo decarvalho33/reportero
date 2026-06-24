@@ -8,6 +8,7 @@ CREATE TABLE denuncias (
   autor       TEXT        NOT NULL DEFAULT 'Anônimo',
   latitude DOUBLE PRECISION, 
   longitude DOUBLE PRECISION,
+  foto_url    TEXT,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
