@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // ✅ NUEVO
-
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'views/formulario_denuncia_screen.dart';
 import 'views/feed_screen.dart';
 
-// 🔥 MAIN ASYNC (ANTES ERA UNA LÍNEA)
+/*Ponto de entrada do aplicativo. Inicializa o Supabase e configura as rotas da aplicação.*/
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -16,6 +15,7 @@ Future<void> main() async {
   runApp(const ReporteroApp());
 }
 
+/*Classe principal do aplicativo, define o tema e as rotas da aplicação.*/
 class ReporteroApp extends StatelessWidget {
   const ReporteroApp({super.key});
 
