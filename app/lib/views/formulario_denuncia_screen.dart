@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../viewmodels/denuncia_viewmodel.dart';
 
 class FormularioDenunciaScreen extends StatefulWidget {
@@ -9,21 +10,59 @@ class FormularioDenunciaScreen extends StatefulWidget {
 }
 
 class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
-  // Instância da lógica separada da UI
   final viewModel = DenunciaViewModel();
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    // Vincula as mudanças da ViewModel para atualizar a tela
+    viewModel.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  // Função nativa para selecionar a imagem da galeria/disco (História 1.5)
+  Future<void> _selecionarFoto() async {
+    try {
+      final XFile? imagem = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+      if (imagem != null) {
+        final bytes = await imagem.readAsBytes();
+        viewModel.definirFoto(bytes, imagem.name);
+      }
+    } catch (e) {
+      debugPrint("Erro ao selecionar foto: $e");
+    }
+  }
 
   void _enviar() async {
+    if (viewModel.isLoading) return;
+
     bool sucesso = await viewModel.submeterFormulario();
     if (sucesso) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Denúncia enviada com sucesso!'),
-          backgroundColor: Colors.teal[700],
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      // F1-04: Limpar campos após sucesso via ViewModel
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Denúncia enviada com sucesso!'),
+            backgroundColor: Colors.teal[700],
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
       viewModel.limpar();
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Falha ao enviar denúncia. Verifique a conexão.'),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
     }
   }
 
@@ -33,7 +72,6 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
       backgroundColor: const Color(0xFFF5F5F5),
       body: Stack(
         children: [
-          // IMAGEM DE FUNDO (Aérea da Unicamp)
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -46,7 +84,6 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
           
           CustomScrollView(
             slivers: [
-              // HEADER COM IMAGEM (Entrada da Unicamp)
               SliverAppBar(
                 expandedHeight: 200.0,
                 floating: false,
@@ -72,7 +109,7 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Form(
-                    key: viewModel.formKey, // Usa a chave que está na ViewModel
+                    key: viewModel.formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -90,12 +127,64 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           validator: viewModel.validarObrigatorio,
                         ),
 
-                        // LOCALIZAÇÃO (OBRIGATÓRIO)
+                        // LOCALIZAÇÃO (TEXTO)
                         _buildInput(
                           controller: viewModel.localCtrl,
                           label: "Localização / Prédio *",
                           icon: Icons.location_on_outlined,
                           validator: viewModel.validarObrigatorio,
+                        ),
+
+                        // 🗺️ SELETOR DE COORDENADAS GPS (História 1.2)
+                        Card(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          elevation: 1,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          child: SwitchListTile(
+                            title: const Text('Anexar Coordenadas GPS', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                            subtitle: Text(
+                              viewModel.latitude != null 
+                                ? 'Lat: ${viewModel.latitude}, Lon: ${viewModel.longitude}'
+                                : 'Inserir localização exata via mapa/satélite',
+                              style: TextStyle(color: viewModel.latitude != null ? Colors.green[700] : Colors.grey[600], fontSize: 12),
+                            ),
+                            value: viewModel.latitude != null,
+                            activeColor: const Color(0xFF2E7D32),
+                            onChanged: viewModel.alternarLocalizacaoGps,
+                          ),
+                        ),
+
+                        // 📸 SELETOR DE IMAGEM EXTERNA (História 1.5)
+                        Card(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          elevation: 1,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Evidência Visual', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                                const SizedBox(height: 8),
+                                if (viewModel.fotoBytes != null) ...[
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: Image.memory(viewModel.fotoBytes!, height: 150, width: double.infinity, fit: BoxFit.cover),
+                                  ),
+                                  const SizedBox(height: 8),
+                                ],
+                                OutlinedButton.icon(
+                                  onPressed: _selecionarFoto,
+                                  icon: const Icon(Icons.camera_alt_outlined),
+                                  label: Text(viewModel.fotoBytes != null ? 'Alterar Foto' : 'Selecionar Foto da Evidência'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: const Color(0xFF37474F),
+                                    side: BorderSide(color: Colors.blueGrey[200]!),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
 
                         // AUTOR (OPCIONAL)
@@ -116,21 +205,23 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
 
                         const SizedBox(height: 24),
                         
-                        // BOTÃO DE ENVIO
+                        // BOTÃO DE ENVIO COM FEEDBACK DE PROGRESSO
                         SizedBox(
                           width: double.infinity,
                           height: 55,
                           child: ElevatedButton(
-                            onPressed: _enviar,
+                            onPressed: viewModel.isLoading ? null : _enviar,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF2E7D32),
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
-                            child: const Text(
-                              "REGISTRAR DENÚNCIA", 
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
-                            ),
+                            child: viewModel.isLoading
+                              ? const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2,)))
+                              : const Text(
+                                  "REGISTRAR DENÚNCIA", 
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
+                                ),
                           ),
                         ),
                         const SizedBox(height: 50),
@@ -146,7 +237,6 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
     );
   }
 
-  // Widget auxiliar para os inputs
   Widget _buildInput({
     required TextEditingController controller,
     required String label,

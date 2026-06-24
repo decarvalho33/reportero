@@ -29,10 +29,10 @@ class DenunciaCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 16,
-                      backgroundColor: const Color(0xFF37474F),
-                      child: const Icon(Icons.person, color: Colors.white, size: 18),
+                      backgroundColor: Color(0xFF37474F),
+                      child: Icon(Icons.person, color: Colors.white, size: 18),
                     ),
                     const SizedBox(width: 8),
                     Text(
@@ -64,18 +64,63 @@ class DenunciaCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
 
-            // Localização
+            // Localização textual
             Row(
               children: [
                 Icon(Icons.location_on_outlined, size: 14, color: Colors.blueGrey[400]),
                 const SizedBox(width: 4),
-                Text(
-                  denuncia.localizacao,
-                  style: TextStyle(fontSize: 13, color: Colors.blueGrey[600]),
+                Expanded(
+                  child: Text(
+                    denuncia.localizacao,
+                    style: TextStyle(fontSize: 13, color: Colors.blueGrey[600]),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
+
+            // Tag Extra: Coordenadas exatas (Se existirem)
+            if (denuncia.latitude != null && denuncia.longitude != null) ...[
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Icon(Icons.explore_outlined, size: 12, color: Colors.green[600]),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Lat: ${denuncia.latitude!.toStringAsFixed(5)}, Lon: ${denuncia.longitude!.toStringAsFixed(5)}',
+                    style: TextStyle(fontSize: 11, color: Colors.green[700], fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            ],
+            
             const SizedBox(height: 10),
+
+            // Imagem anexada via Supabase Storage (Se existir)
+            if (denuncia.fotoUrl != null && denuncia.fotoUrl!.isNotEmpty) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  denuncia.fotoUrl!,
+                  width: double.infinity,
+                  height: 160,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: 40,
+                    color: Colors.grey[100],
+                    child: Row(
+                      children: [
+                        const SizedBox(width: 8),
+                        Icon(Icons.broken_image_outlined, color: Colors.grey[400], size: 16),
+                        const SizedBox(width: 4),
+                        Text('Erro ao carregar mídia', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
 
             // Descrição (máx. 3 linhas)
             Text(
