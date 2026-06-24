@@ -5,9 +5,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app/models/denuncia.dart';
 import 'package:app/services/denuncia_service.dart';
 
-const _supabaseUrl = 'https://wfxugctznmathcwqsgkt.supabase.co';
-const _supabaseAnonKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndmeHVnY3R6bm1hdGhjd3FzZ2t0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NjEwOTIsImV4cCI6MjA5MjUzNzA5Mn0.CFdzBSEQXcQ-pQnN1J_gum_ynzB1BO4aHO_axg28T14';
+const _supabaseUrl = 'https://fxkelgxlfddybvtmpzye.supabase.co';
+const _supabaseAnonKey = 'sb_publishable_0trdTilYVLii8p2kmnGSrA_MgwJY5ki';
 
 Future<void> _limparTabela() async {
   try {
@@ -26,7 +25,8 @@ void main() {
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    HttpOverrides.global = null; // allow real HTTP — TestWidgetsFlutterBinding blocks it by default
+    HttpOverrides.global =
+        null; // allow real HTTP — TestWidgetsFlutterBinding blocks it by default
     SharedPreferences.setMockInitialValues({});
     await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
     // Verify REST connectivity before running tests
@@ -39,10 +39,13 @@ void main() {
   tearDown(() async => _limparTabela());
 
   group('DenunciaService', () {
-    test('obtenerDenuncias retorna lista vazia quando banco está limpo', () async {
-      final resultado = await service.obtenerDenuncias();
-      expect(resultado, isEmpty);
-    });
+    test(
+      'obtenerDenuncias retorna lista vazia quando banco está limpo',
+      () async {
+        final resultado = await service.obtenerDenuncias();
+        expect(resultado, isEmpty);
+      },
+    );
 
     test('enviarDenuncia persiste a denúncia no banco', () async {
       final denuncia = Denuncia(
@@ -62,37 +65,40 @@ void main() {
     });
 
     test('obtenerDenuncias retorna todas as denúncias inseridas', () async {
-      await service.enviarDenuncia(Denuncia(
-        titulo: 'Denúncia 1',
-        descricao: 'Desc 1',
-        localizacao: 'IC',
-      ));
-      await service.enviarDenuncia(Denuncia(
-        titulo: 'Denúncia 2',
-        descricao: 'Desc 2',
-        localizacao: 'CB',
-      ));
+      await service.enviarDenuncia(
+        Denuncia(titulo: 'Denúncia 1', descricao: 'Desc 1', localizacao: 'IC'),
+      );
+      await service.enviarDenuncia(
+        Denuncia(titulo: 'Denúncia 2', descricao: 'Desc 2', localizacao: 'CB'),
+      );
 
       final resultado = await service.obtenerDenuncias();
       expect(resultado.length, equals(2));
     });
 
-    test('obtenerDenuncias retorna ordenado por created_at decrescente', () async {
-      await service.enviarDenuncia(Denuncia(
-        titulo: 'Primeira',
-        descricao: 'Enviada primeiro',
-        localizacao: 'IC',
-      ));
-      await Future.delayed(const Duration(milliseconds: 100));
-      await service.enviarDenuncia(Denuncia(
-        titulo: 'Segunda',
-        descricao: 'Enviada depois',
-        localizacao: 'CB',
-      ));
+    test(
+      'obtenerDenuncias retorna ordenado por created_at decrescente',
+      () async {
+        await service.enviarDenuncia(
+          Denuncia(
+            titulo: 'Primeira',
+            descricao: 'Enviada primeiro',
+            localizacao: 'IC',
+          ),
+        );
+        await Future.delayed(const Duration(milliseconds: 100));
+        await service.enviarDenuncia(
+          Denuncia(
+            titulo: 'Segunda',
+            descricao: 'Enviada depois',
+            localizacao: 'CB',
+          ),
+        );
 
-      final resultado = await service.obtenerDenuncias();
-      expect(resultado.first.titulo, equals('Segunda'));
-      expect(resultado.last.titulo, equals('Primeira'));
-    });
+        final resultado = await service.obtenerDenuncias();
+        expect(resultado.first.titulo, equals('Segunda'));
+        expect(resultado.last.titulo, equals('Primeira'));
+      },
+    );
   });
 }
