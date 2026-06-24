@@ -2,8 +2,19 @@ import 'dart:typed_data';
 import '../models/denuncia.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/* Serviço para gerenciar denúncias */
+/* Serviço para gerenciar denúncias (Singleton) */
 class DenunciaService {
+  // 1. Instancia estática privada
+  static final DenunciaService _instance = DenunciaService._internal();
+
+  // 2. Construtor privado (evita instanciar de fora)
+  DenunciaService._internal();
+
+  // 3. Factory constructor que retorna sempre a mesma instância
+  factory DenunciaService() {
+    return _instance;
+  }
+
   SupabaseClient get _supabase => Supabase.instance.client;
 
   /* Valida as coordenadas geográficas */
@@ -26,7 +37,6 @@ class DenunciaService {
   /* Subir foto ao Supabase Storage */
   Future<String?> subirFoto(Uint8List fotoBytes, String nomeArquivo) async {
     try { 
-      // CORREÇÃO: Removidas as chaves incorretas do DateTime.now()
       final String caminhoBucket = 'fotos/${DateTime.now().millisecondsSinceEpoch}_$nomeArquivo';
       await _supabase.storage.from('evidencias').uploadBinary(caminhoBucket, fotoBytes, fileOptions: const FileOptions(upsert: true));
       final String urlPublica = _supabase.storage.from('evidencias').getPublicUrl(caminhoBucket);
