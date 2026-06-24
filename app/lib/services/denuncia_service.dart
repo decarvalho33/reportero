@@ -23,11 +23,11 @@ class DenunciaService {
     }
   }
 
-  /* Envia uma denúncia para o banco de dados */
   /* Subir foto ao Supabase Storage */
   Future<String?> subirFoto(Uint8List fotoBytes, String nomeArquivo) async {
     try { 
-      final String caminhoBucket = 'fotos/${DateTime}.now().millisecondsSinceEpoch}_$nomeArquivo';
+      // CORREÇÃO: Removidas as chaves incorretas do DateTime.now()
+      final String caminhoBucket = 'fotos/${DateTime.now().millisecondsSinceEpoch}_$nomeArquivo';
       await _supabase.storage.from('evidencias').uploadBinary(caminhoBucket, fotoBytes, fileOptions: const FileOptions(upsert: true));
       final String urlPublica = _supabase.storage.from('evidencias').getPublicUrl(caminhoBucket);
       return urlPublica;
