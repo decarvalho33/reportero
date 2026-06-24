@@ -4,6 +4,7 @@ class Denuncia {
   final String descricao;
   final String localizacao;
   final String autor;
+  final String? fotoUrl; 
   final DateTime? createdAt;
 
   Denuncia({
@@ -12,10 +13,10 @@ class Denuncia {
     required this.descricao,
     required this.localizacao,
     this.autor = "Anônimo",
+    this.fotoUrl,
     this.createdAt,
   });
 
-  // Essencial para o João (Service) converter dados do banco
   factory Denuncia.fromJson(Map<String, dynamic> json) {
     return Denuncia(
       id: json['id'],
@@ -23,6 +24,7 @@ class Denuncia {
       descricao: json['descricao'],
       localizacao: json['localizacao'],
       autor: json['autor'] ?? "Anônimo",
+      fotoUrl: json['foto_url'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
     );
   }
@@ -34,6 +36,7 @@ class Denuncia {
       'descricao': descricao,
       'localizacao': localizacao,
       'autor': autor,
+      if (fotoUrl != null) 'foto_url': fotoUrl,
     };
   }
 }

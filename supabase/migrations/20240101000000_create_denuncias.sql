@@ -6,6 +6,7 @@ CREATE TABLE denuncias (
   descricao   TEXT        NOT NULL,
   localizacao TEXT        NOT NULL,
   autor       TEXT        NOT NULL DEFAULT 'Anônimo',
+  foto_url    TEXT,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
