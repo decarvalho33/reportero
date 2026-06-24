@@ -17,7 +17,7 @@ Future<void> _limparTabela() async {
         .neq('id', '00000000-0000-0000-0000-000000000000');
   } catch (e) {
     // ignore: table may be empty or cleanup failed - tests will still run
-    print('_limparTabela: $e');
+    throw Exception("Falha ao limpar a tabela de denúncias: $e");
   }
 }
 
@@ -26,7 +26,8 @@ void main() {
 
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
-    HttpOverrides.global = null; // allow real HTTP — TestWidgetsFlutterBinding blocks it by default
+    HttpOverrides.global =
+        null; // allow real HTTP — TestWidgetsFlutterBinding blocks it by default
     SharedPreferences.setMockInitialValues({});
     await Supabase.initialize(url: _supabaseUrl, anonKey: _supabaseAnonKey);
     // Verify REST connectivity before running tests
@@ -39,10 +40,13 @@ void main() {
   tearDown(() async => _limparTabela());
 
   group('DenunciaService', () {
-    test('obtenerDenuncias retorna lista vazia quando banco está limpo', () async {
-      final resultado = await service.obtenerDenuncias();
-      expect(resultado, isEmpty);
-    });
+    test(
+      'obtenerDenuncias retorna lista vazia quando banco está limpo',
+      () async {
+        final resultado = await service.obtenerDenuncias();
+        expect(resultado, isEmpty);
+      },
+    );
 
     test('enviarDenuncia persiste a denúncia no banco', () async {
       final denuncia = Denuncia(
@@ -62,37 +66,40 @@ void main() {
     });
 
     test('obtenerDenuncias retorna todas as denúncias inseridas', () async {
-      await service.enviarDenuncia(Denuncia(
-        titulo: 'Denúncia 1',
-        descricao: 'Desc 1',
-        localizacao: 'IC',
-      ));
-      await service.enviarDenuncia(Denuncia(
-        titulo: 'Denúncia 2',
-        descricao: 'Desc 2',
-        localizacao: 'CB',
-      ));
+      await service.enviarDenuncia(
+        Denuncia(titulo: 'Denúncia 1', descricao: 'Desc 1', localizacao: 'IC'),
+      );
+      await service.enviarDenuncia(
+        Denuncia(titulo: 'Denúncia 2', descricao: 'Desc 2', localizacao: 'CB'),
+      );
 
       final resultado = await service.obtenerDenuncias();
       expect(resultado.length, equals(2));
     });
 
-    test('obtenerDenuncias retorna ordenado por created_at decrescente', () async {
-      await service.enviarDenuncia(Denuncia(
-        titulo: 'Primeira',
-        descricao: 'Enviada primeiro',
-        localizacao: 'IC',
-      ));
-      await Future.delayed(const Duration(milliseconds: 100));
-      await service.enviarDenuncia(Denuncia(
-        titulo: 'Segunda',
-        descricao: 'Enviada depois',
-        localizacao: 'CB',
-      ));
+    test(
+      'obtenerDenuncias retorna ordenado por created_at decrescente',
+      () async {
+        await service.enviarDenuncia(
+          Denuncia(
+            titulo: 'Primeira',
+            descricao: 'Enviada primeiro',
+            localizacao: 'IC',
+          ),
+        );
+        await Future.delayed(const Duration(milliseconds: 100));
+        await service.enviarDenuncia(
+          Denuncia(
+            titulo: 'Segunda',
+            descricao: 'Enviada depois',
+            localizacao: 'CB',
+          ),
+        );
 
-      final resultado = await service.obtenerDenuncias();
-      expect(resultado.first.titulo, equals('Segunda'));
-      expect(resultado.last.titulo, equals('Primeira'));
-    });
+        final resultado = await service.obtenerDenuncias();
+        expect(resultado.first.titulo, equals('Segunda'));
+        expect(resultado.last.titulo, equals('Primeira'));
+      },
+    );
   });
 }
