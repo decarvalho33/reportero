@@ -4,6 +4,17 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 ///Serviço responsável por gerenciar as operações relacionadas às denúncias, incluindo validação de coordenadas, envio de denúncias e upload de fotos para o Supabase Storage.
 class DenunciaService {
+  // 1. Instancia estática privada
+  static final DenunciaService _instance = DenunciaService._internal();
+
+  // 2. Construtor privado (evita instanciar de fora)
+  DenunciaService._internal();
+
+  // 3. Factory constructor que retorna sempre a mesma instância
+  factory DenunciaService() {
+    return _instance;
+  }
+
   SupabaseClient get _supabase => Supabase.instance.client;
 
   /// Valida as coordenadas de latitude e longitude fornecidas. Lança um erro se as coordenadas forem inválidas.
