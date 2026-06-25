@@ -1,4 +1,4 @@
-/* Modelo de dados para representar uma denúncia */
+/// Modelo de dados para representar uma denúncia, incluindo informações como título, descrição, localização, autor, coordenadas geográficas, URL da foto e data de criação.
 class Denuncia {
   final String? id;
   final String titulo;
@@ -10,7 +10,7 @@ class Denuncia {
   final String? fotoUrl; 
   final DateTime? createdAt;
 
-  /* Construtor*/
+  /// Construtor da classe Denuncia, que inicializa os campos obrigatórios e opcionais.
   Denuncia({
     this.id,
     required this.titulo,
@@ -23,6 +23,7 @@ class Denuncia {
     this.createdAt,
   });
 
+  /// Cria uma instância de Denuncia a partir de um mapa JSON.
   factory Denuncia.fromJson(Map<String, dynamic> json) {
     return Denuncia(
       id: json['id'],
@@ -37,7 +38,8 @@ class Denuncia {
     );
   }
 
-  /*Método para converter a instância em um mapa JSON*/
+
+  /// Converte a instância em um mapa JSON.
   Map<String, dynamic> toJson() {
     return {
       'titulo': titulo,

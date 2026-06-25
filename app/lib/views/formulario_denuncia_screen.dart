@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../viewmodels/denuncia_viewmodel.dart';
 
+/// Tela de formulário para registrar uma nova denúncia, permitindo ao usuário inserir título, localização, descrição, autor, anexar foto e coordenadas GPS.
 class FormularioDenunciaScreen extends StatefulWidget {
   const FormularioDenunciaScreen({super.key});
 
@@ -9,6 +10,7 @@ class FormularioDenunciaScreen extends StatefulWidget {
   State<FormularioDenunciaScreen> createState() => _FormularioDenunciaScreenState();
 }
 
+/// Estado da tela FormularioDenunciaScreen, responsável por gerenciar a entrada do usuário, validação do formulário e interação com o ViewModel.
 class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
   final viewModel = DenunciaViewModel();
   final ImagePicker _picker = ImagePicker();
@@ -16,13 +18,13 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
   @override
   void initState() {
     super.initState();
-    // Vincula as mudanças da ViewModel para atualizar a tela
+    /// Vincula as mudanças da ViewModel para atualizar a tela
     viewModel.addListener(() {
       if (mounted) setState(() {});
     });
   }
 
-  // Função nativa para selecionar a imagem da galeria/disco (História 1.5)
+  /// Função nativa para selecionar a imagem da galeria/disco
   Future<void> _selecionarFoto() async {
     try {
       final XFile? imagem = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
@@ -35,6 +37,7 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
     }
   }
 
+  /// Função para enviar o formulário de denúncia
   void _enviar() async {
     if (viewModel.isLoading) return;
 
@@ -119,7 +122,7 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                         ),
                         const SizedBox(height: 24),
                         
-                        // TÍTULO
+                        /// TÍTULO
                         _buildInput(
                           controller: viewModel.tituloCtrl,
                           label: "Título da Ocorrência *",
@@ -127,7 +130,7 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           validator: viewModel.validarObrigatorio,
                         ),
 
-                        // LOCALIZAÇÃO (TEXTO)
+                        /// LOCALIZAÇÃO (TEXTO)
                         _buildInput(
                           controller: viewModel.localCtrl,
                           label: "Localização / Prédio *",
@@ -135,7 +138,7 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           validator: viewModel.validarObrigatorio,
                         ),
 
-                        // 🗺️ SELETOR DE COORDENADAS GPS (História 1.2)
+                        /// SELETOR DE COORDENADAS GPS 
                         Card(
                           margin: const EdgeInsets.only(bottom: 16),
                           elevation: 1,
@@ -154,7 +157,7 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           ),
                         ),
 
-                        // 📸 SELETOR DE IMAGEM EXTERNA (História 1.5)
+                        /// SELETOR DE IMAGEM EXTERNA 
                         Card(
                           margin: const EdgeInsets.only(bottom: 16),
                           elevation: 1,
@@ -187,14 +190,14 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           ),
                         ),
 
-                        // AUTOR (OPCIONAL)
+                        /// AUTOR (OPCIONAL)
                         _buildInput(
                           controller: viewModel.autorCtrl,
                           label: "Seu Nome (Opcional)",
                           icon: Icons.person_outline,
                         ),
 
-                        // DESCRIÇÃO
+                        /// DESCRIÇÃO
                         _buildInput(
                           controller: viewModel.descCtrl,
                           label: "Descrição do Incidente *",
@@ -205,7 +208,7 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
 
                         const SizedBox(height: 24),
                         
-                        // BOTÃO DE ENVIO COM FEEDBACK DE PROGRESSO
+                        /// BOTÃO DE ENVIO COM FEEDBACK DE PROGRESSO
                         SizedBox(
                           width: double.infinity,
                           height: 55,
@@ -237,6 +240,7 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
     );
   }
 
+  /// Constrói um campo de entrada de texto com ícone, rótulo e validação.
   Widget _buildInput({
     required TextEditingController controller,
     required String label,
