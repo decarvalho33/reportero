@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../viewmodels/feed_viewmodel.dart';
 import 'widgets/denuncia_card.dart';
 
+/// Tela principal do aplicativo, exibindo o feed de denúncias com suporte a ordenação, filtragem e navegação para o formulário de nova denúncia.
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
 
@@ -9,6 +10,7 @@ class FeedScreen extends StatefulWidget {
   State<FeedScreen> createState() => _FeedScreenState();
 }
 
+/// Estado da tela FeedScreen, responsável por gerenciar a exibição das denúncias, estado de carregamento e interação com o ViewModel.
 class _FeedScreenState extends State<FeedScreen> {
   final _viewModel = FeedViewModel();
 
@@ -25,13 +27,14 @@ class _FeedScreenState extends State<FeedScreen> {
     super.dispose();
   }
 
+/// Construtor do widget FeedScreen, que inicializa o estado e configura o ViewModel para carregar as denúncias.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: CustomScrollView(
         slivers: [
-          // Header igual ao formulário
+          /// Header igual ao formulário
           SliverAppBar(
             expandedHeight: 200.0,
             floating: false,
@@ -60,7 +63,7 @@ class _FeedScreenState extends State<FeedScreen> {
             ),
           ),
 
-          // Conteúdo
+          /// Conteúdo
           if (_viewModel.isLoading)
             const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
@@ -117,7 +120,7 @@ class _FeedScreenState extends State<FeedScreen> {
         ],
       ),
 
-      // FAB para nova denúncia
+      /// FAB para nova denúncia
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.pushNamed(context, '/nova'),
         backgroundColor: const Color(0xFF2E7D32),

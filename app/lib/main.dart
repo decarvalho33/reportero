@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'views/formulario_denuncia_screen.dart';
 import 'views/feed_screen.dart';
 
-/*Ponto de entrada do aplicativo. Inicializa o Supabase e configura as rotas da aplicação.*/
+/// Ponto de entrada principal do aplicativo, responsável por inicializar o Supabase e configurar a aplicação Flutter.
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -15,7 +15,7 @@ Future<void> main() async {
   runApp(const ReporteroApp());
 }
 
-/*Classe principal do aplicativo, define o tema e as rotas da aplicação.*/
+/// Classe principal do aplicativo, que define a estrutura básica da aplicação e suas rotas.
 class ReporteroApp extends StatelessWidget {
   const ReporteroApp({super.key});
 

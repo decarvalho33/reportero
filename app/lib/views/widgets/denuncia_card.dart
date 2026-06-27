@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../models/denuncia.dart';
 
+/// Widget que representa visualmente uma denúncia, exibindo informações como título, descrição, localização, autor, tempo relativo e imagem anexada (se houver).
 class DenunciaCard extends StatelessWidget {
   final Denuncia denuncia;
   final String tempoRelativo;
-
+  /// Construtor do widget DenunciaCard, que recebe uma denúncia e o tempo relativo para exibição.
   const DenunciaCard({
     super.key,
     required this.denuncia,
@@ -53,7 +54,7 @@ class DenunciaCard extends StatelessWidget {
 
             const Divider(height: 20),
 
-            // Título
+            /// Título
             Text(
               denuncia.titulo,
               style: const TextStyle(
@@ -64,7 +65,7 @@ class DenunciaCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
 
-            // Localização textual
+            /// Localização textual
             Row(
               children: [
                 Icon(Icons.location_on_outlined, size: 14, color: Colors.blueGrey[400]),
@@ -79,7 +80,7 @@ class DenunciaCard extends StatelessWidget {
               ],
             ),
 
-            // Tag Extra: Coordenadas exatas (Se existirem)
+            /// Tag Extra: Coordenadas exatas (Se existirem)
             if (denuncia.latitude != null && denuncia.longitude != null) ...[
               const SizedBox(height: 4),
               Row(
@@ -96,7 +97,7 @@ class DenunciaCard extends StatelessWidget {
             
             const SizedBox(height: 10),
 
-            // Imagem anexada via Supabase Storage (Se existir)
+            /// Imagem anexada via Supabase Storage (Se existir)
             if (denuncia.fotoUrl != null && denuncia.fotoUrl!.isNotEmpty) ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
@@ -122,7 +123,7 @@ class DenunciaCard extends StatelessWidget {
               const SizedBox(height: 10),
             ],
 
-            // Descrição (máx. 3 linhas)
+            /// Descrição (máx. 3 linhas)
             Text(
               denuncia.descricao,
               maxLines: 3,
