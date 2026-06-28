@@ -19,11 +19,18 @@ class DenunciaViewModel extends ChangeNotifier {
   double? _latitude;
   double? _longitude;
   bool _isLoading = false;
+  String _categoriaSelecionada = 'Outros';
 
   Uint8List? get fotoBytes => _fotoBytes;
   double? get latitude => _latitude;
   double? get longitude => _longitude;
   bool get isLoading => _isLoading;
+  String get categoriaSelecionada => _categoriaSelecionada;
+
+  void selecionarCategoria(String categoria) {
+    _categoriaSelecionada = categoria;
+    notifyListeners();
+  }
 
   // Atualiza a foto selecionada
   void definirFoto(Uint8List bytes, String nome) {
@@ -72,6 +79,7 @@ class DenunciaViewModel extends ChangeNotifier {
         latitude: _latitude,
         longitude: _longitude,
         fotoUrl: urlPublicaFoto,
+        categoria: _categoriaSelecionada,
       );
 
       // 3. Envia os dados finais ao Supabase
@@ -97,6 +105,7 @@ class DenunciaViewModel extends ChangeNotifier {
     _nomeArquivoFoto = null;
     _latitude = null;
     _longitude = null;
+    _categoriaSelecionada = 'Outros';
     notifyListeners();
   }
 }

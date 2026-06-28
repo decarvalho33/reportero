@@ -40,5 +40,34 @@ void main() {
       expect(viewModel.descCtrl.text, isEmpty);
       expect(viewModel.autorCtrl.text, isEmpty);
     });
+
+    test('reseta categoria para "Outros"', () {
+      viewModel.selecionarCategoria('Segurança');
+      expect(viewModel.categoriaSelecionada, equals('Segurança'));
+
+      viewModel.limpar();
+
+      expect(viewModel.categoriaSelecionada, equals('Outros'));
+    });
+  });
+
+  group('categoria', () {
+    test('valor padrão é "Outros"', () {
+      expect(viewModel.categoriaSelecionada, equals('Outros'));
+    });
+
+    test('selecionarCategoria atualiza o estado', () {
+      viewModel.selecionarCategoria('Infraestrutura');
+      expect(viewModel.categoriaSelecionada, equals('Infraestrutura'));
+    });
+
+    test('selecionarCategoria notifica listeners', () {
+      var notificou = false;
+      viewModel.addListener(() => notificou = true);
+
+      viewModel.selecionarCategoria('Serviços');
+
+      expect(notificou, isTrue);
+    });
   });
 }
