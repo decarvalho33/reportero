@@ -47,6 +47,12 @@ class Denuncia {
   final String? fotoUrl;
   final DateTime? createdAt;
 
+  /// Quantidade total de apoios (upvotes) recebidos pela denúncia.
+  final int totalApoios;
+
+  /// Indica se o dispositivo atual já apoiou esta denúncia (preenchido pelo serviço).
+  final bool jaApoiei;
+
   /// Construtor da classe Denuncia, que inicializa os campos obrigatórios e opcionais.
   Denuncia({
     this.id,
@@ -59,6 +65,8 @@ class Denuncia {
     this.longitude,
     this.fotoUrl,
     this.createdAt,
+    this.totalApoios = 0,
+    this.jaApoiei = false,
   });
 
   /// Cria uma instância de Denuncia a partir de um mapa JSON.
@@ -76,6 +84,40 @@ class Denuncia {
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
+      totalApoios: _parseTotalApoios(json['apoios']),
+    );
+  }
+
+  /// Extrai a contagem de apoios da consulta agregada do Supabase.
+  ///
+  /// Com `select('*, apoios(count)')` o PostgREST retorna `apoios: [{count: N}]`.
+  /// Também aceita um inteiro direto e cai para 0 quando o campo está ausente.
+  static int _parseTotalApoios(dynamic apoios) {
+    if (apoios is int) return apoios;
+    if (apoios is List && apoios.isNotEmpty) {
+      final primeiro = apoios.first;
+      if (primeiro is Map && primeiro['count'] is int) {
+        return primeiro['count'] as int;
+      }
+    }
+    return 0;
+  }
+
+  /// Cria uma cópia da denúncia alterando apenas os campos informados.
+  Denuncia copyWith({int? totalApoios, bool? jaApoiei}) {
+    return Denuncia(
+      id: id,
+      titulo: titulo,
+      descricao: descricao,
+      localizacao: localizacao,
+      autor: autor,
+      categoria: categoria,
+      latitude: latitude,
+      longitude: longitude,
+      fotoUrl: fotoUrl,
+      createdAt: createdAt,
+      totalApoios: totalApoios ?? this.totalApoios,
+      jaApoiei: jaApoiei ?? this.jaApoiei,
     );
   }
 
