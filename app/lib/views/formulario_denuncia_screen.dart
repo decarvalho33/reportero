@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../models/denuncia.dart'; // <--- ¡ASEGÚRATE DE QUE ESTA LÍNEA ESTÉ AQUÍ!
 import '../viewmodels/denuncia_viewmodel.dart';
 
 /// Tela de formulário para registrar uma nova denúncia, permitindo ao usuário inserir título, localização, descrição, autor, anexar foto e coordenadas GPS.
@@ -137,6 +138,48 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           icon: Icons.location_on_outlined,
                           validator: viewModel.validarObrigatorio,
                         ),
+
+                        /// NOVO: SELETOR DE CATEGORIAS (COMPATÍVEL COM US #32)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: DropdownButtonFormField<Categoria>(
+                            value: viewModel.categoriaSelecionada,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              prefixIcon: Icon(Icons.category_outlined, color: Colors.blueGrey[400]),
+                              labelText: "Categoria do Incidente *",
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.grey[300]!),
+                              ),
+                            ),
+                            isExpanded: true,
+                            // O que aparece na caixa fechada (só o nome curto)
+                            selectedItemBuilder: (BuildContext context) {
+                              return Categoria.values.map<Widget>((Categoria cat) {
+                                return Text(cat.label, style: const TextStyle(fontSize: 15));
+                              }).toList();
+                            },
+                            // O menu aberto com os subtítulos descritivos exigidos
+                            items: Categoria.values.map((Categoria cat) {
+                              return DropdownMenuItem<Categoria>(
+                                value: cat,
+                                child: ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  title: Text(cat.label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                  subtitle: Text(cat.descricao, style: const TextStyle(fontSize: 11, height: 1.2)),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (Categoria? nova) {
+                              if (nova != null) viewModel.definirCategoria(nova);
+                            },
+                          ),
+                        ),
+
+                        /// SELETOR DE COORDENADAS GPS... (O código continua igual daqui para baixo)
 
                         /// SELETOR DE COORDENADAS GPS 
                         Card(
