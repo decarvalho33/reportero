@@ -129,6 +129,60 @@ As entrevistas convergem em torno de alguns temas centrais:
 
 ## 2. Épicos e Histórias de Usuário
 
-### 2.1 Épico 1
-### 2.2 Épico 2
-### 2.3 Épico 3
+### 2.1 Épico 1 — Criação e Registro de Denúncias
+
+**Descrição:** Permitir que os universitários registrem denúncias sobre problemas no campus de forma rápida, em poucos cliques, garantindo agilidade e organização.
+
+**História 1.1**
+Como universitário, quero preencher um formulário de denúncia simplificado e rápido, para registrar um problema encontrado no campus com o mínimo de cliques possível.
+
+**História 1.2**
+Como universitário, quero classificar o problema selecionando uma categoria (ex: infraestrutura, segurança, limpeza, etc.), para que a denúncia seja organizada e roteada corretamente.
+
+**História 1.3**
+Como universitário, quero informar a localização da ocorrência no mapa, para que o problema possa ser identificado e encontrado rapidamente.
+
+**História 1.4**
+Como universitário, quero adicionar uma breve descrição do incidente, para fornecer contexto adicional sobre a denúncia.
+
+**História 1.5**
+Como universitário, quero anexar uma foto do incidente de forma prática, para que outros estudantes e a administração visualizem a gravidade do problema.
+
+**História 1.6**
+Como universitário, quero ter a opção clara de registrar a denúncia de forma anônima (ou me identificar, se preferir), para relatar problemas sem fricção e sem medo de exposição.
+
+---
+
+### 2.2 Épico 2 — Visualização e Consulta de Denúncias
+
+**Descrição:** Permitir que os universitários visualizem um feed de denúncias registradas na plataforma para acompanhar os problemas reportados pela comunidade acadêmica.
+
+**História 2.1**
+Como universitário, quero visualizar um feed com uma lista de denúncias, para conhecer e me engajar com os problemas reportados no campus.
+
+**História 2.2**
+Como universitário, quero visualizar o título, a categoria, a localização, o autor (ou indicação de anonimato) e a descrição de cada denúncia, para compreender melhor a ocorrência.
+
+**História 2.3**
+Como universitário, quero visualizar as denúncias ordenadas pelas mais recentes, para acompanhar os acontecimentos e problemas atuais da universidade.
+
+**História 2.4**
+Como universitário, quero filtrar as denúncias por categoria, para facilitar a busca, consulta e análise das ocorrências que mais me interessam.
+
+---
+
+### 2.3 Épico 3 — Priorização Comunitária de Denúncias e Engajamento
+
+**Descrição:** Permitir que a comunidade acadêmica apoie denúncias para dar visibilidade e peso coletivo aos problemas mais relevantes.
+
+**História 3.1**
+Como universitário, quero apoiar (dar "upvote") uma denúncia, para demonstrar que também fui afetado pelo problema e ajudar a dar peso coletivo àquela questão.
+
+**História 3.2**
+Como universitário, quero visualizar a quantidade de apoios em uma denúncia, para identificar facilmente os problemas mais recorrentes e críticos do campus.
+
+**História 3.3**
+Como universitário, quero ordenar o feed de denúncias pela quantidade de apoios, para visualizar as ocorrências consideradas mais relevantes pela comunidade.
+
+**História 3.4**
+Como universitário, quero remover meu apoio de uma denúncia, caso tenha cometido um erro ao clicar ou tenha mudado de opinião.
