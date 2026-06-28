@@ -80,20 +80,66 @@ class DenunciaCard extends StatelessWidget {
               ],
             ),
 
-            /// Tag Extra: Coordenadas exatas (Se existirem)
-            if (denuncia.latitude != null && denuncia.longitude != null) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(Icons.explore_outlined, size: 12, color: Colors.green[600]),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Lat: ${denuncia.latitude!.toStringAsFixed(5)}, Lon: ${denuncia.longitude!.toStringAsFixed(5)}',
-                    style: TextStyle(fontSize: 11, color: Colors.green[700], fontWeight: FontWeight.w500),
+            const SizedBox(height: 6),
+
+            /// METADADOS ROW: Coordenadas GPS e Categoria com Tooltip explicativo
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                /// Tag Extra: Coordenadas exatas (Se existirem)
+                if (denuncia.latitude != null && denuncia.longitude != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.green[50],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.explore_outlined, size: 12, color: Colors.green[600]),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Lat: ${denuncia.latitude!.toStringAsFixed(5)}, Lon: ${denuncia.longitude!.toStringAsFixed(5)}',
+                          style: TextStyle(fontSize: 11, color: Colors.green[700], fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ],
+
+                /// Categoria com Tooltip Dinâmico
+                Tooltip(
+                  message: denuncia.categoria.descricao, // Pega o texto explicativo de João Pedro
+                  waitDuration: Duration.zero, // Abre imediatamente ao passar o ponteiro do mouse
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF37474F).withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.blueGrey[50],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.sell_outlined, size: 12, color: Colors.blueGrey[700]),
+                        const SizedBox(width: 4),
+                        Text(
+                          denuncia.categoria.label, // Exibe o texto amigável: "Infraestrutura", "Limpeza", etc.
+                          style: TextStyle(fontSize: 11, color: Colors.blueGrey[800], fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
             
             const SizedBox(height: 10),
 
