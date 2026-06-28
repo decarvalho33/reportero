@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../models/denuncia.dart';
 import '../viewmodels/feed_viewmodel.dart';
 import 'widgets/denuncia_card.dart';
 
@@ -60,6 +61,23 @@ class _FeedScreenState extends State<FeedScreen> {
             ),
           ),
 
+          // Chips de filtro por categoria
+          SliverToBoxAdapter(
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildCategoriaChip('Todas', null),
+                    ...categoriasDenuncia.map((c) => _buildCategoriaChip(c, c)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
           // Conteúdo
           if (_viewModel.isLoading)
             const SliverFillRemaining(
@@ -92,7 +110,9 @@ class _FeedScreenState extends State<FeedScreen> {
                     Icon(Icons.inbox_outlined, color: Colors.grey[400], size: 48),
                     const SizedBox(height: 12),
                     Text(
-                      'Nenhuma denúncia registrada ainda.',
+                      _viewModel.filtroCategoria != null
+                          ? 'Nenhuma denúncia encontrada para esta categoria.'
+                          : 'Nenhuma denúncia registrada ainda.',
                       style: TextStyle(color: Colors.grey[600]),
                     ),
                   ],
@@ -124,6 +144,27 @@ class _FeedScreenState extends State<FeedScreen> {
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: const Text('Nova Denúncia'),
+      ),
+    );
+  }
+
+  Widget _buildCategoriaChip(String label, String? categoria) {
+    final selecionado = _viewModel.filtroCategoria == categoria;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: selecionado,
+        onSelected: (_) => _viewModel.filtrarPorCategoria(selecionado ? null : categoria),
+        selectedColor: const Color(0xFF37474F),
+        backgroundColor: Colors.white,
+        side: BorderSide(color: Colors.blueGrey[200]!),
+        labelStyle: TextStyle(
+          color: selecionado ? Colors.white : const Color(0xFF37474F),
+          fontWeight: FontWeight.w500,
+          fontSize: 13,
+        ),
+        showCheckmark: false,
       ),
     );
   }
