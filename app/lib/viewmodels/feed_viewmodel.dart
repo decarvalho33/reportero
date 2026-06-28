@@ -4,19 +4,21 @@ import '../services/denuncia_service.dart';
 
 class FeedViewModel extends ChangeNotifier {
   final _service = DenunciaService();
-  
+
   List<Denuncia> _allDenuncias = []; // Cache completo vindo do Supabase
   List<Denuncia> _denunciasFiltradas = []; // Lista exibida na tela
-  
+
   bool _isLoading = false;
   String? _erro;
   bool _ordenacaoMaisRecente = true; // Controle de estado da ordenação
-  String _filtroTexto = ""; // Estado do filtro de busca
+  String _filtroTexto = "";
+  String? _filtroCategoria; // null = todas as categorias
 
   List<Denuncia> get denuncias => _denunciasFiltradas;
   bool get isLoading => _isLoading;
   String? get erro => _erro;
   bool get ordenacaoMaisRecente => _ordenacaoMaisRecente;
+  String? get filtroCategoria => _filtroCategoria;
 
   Future<void> carregarDenuncias() async {
     _isLoading = true;
@@ -66,18 +68,24 @@ class FeedViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Define a categoria ativa; null remove o filtro de categoria - História 2.4
+  void filtrarPorCategoria(String? categoria) {
+    _filtroCategoria = categoria;
+    _aplicarFiltrosEOrdenacao();
+    notifyListeners();
+  }
+
   // Lógica interna para processar os dados em memória
   void _aplicarFiltrosEOrdenacao() {
-    // Aplicar Filtro por Texto
-    if (_filtroTexto.isEmpty) {
-      _denunciasFiltradas = List.from(_allDenuncias);
-    } else {
-      _denunciasFiltradas = _allDenuncias.where((d) {
-        return d.titulo.toLowerCase().contains(_filtroTexto) ||
-               d.descricao.toLowerCase().contains(_filtroTexto) ||
-               d.localizacao.toLowerCase().contains(_filtroTexto);
-      }).toList();
-    }
+    _denunciasFiltradas = _allDenuncias.where((d) {
+      final passaTexto = _filtroTexto.isEmpty ||
+          d.titulo.toLowerCase().contains(_filtroTexto) ||
+          d.descricao.toLowerCase().contains(_filtroTexto) ||
+          d.localizacao.toLowerCase().contains(_filtroTexto);
+      final passaCategoria =
+          _filtroCategoria == null || d.categoria == _filtroCategoria;
+      return passaTexto && passaCategoria;
+    }).toList();
 
     // Aplicar Ordenação Cronológica
     if (_ordenacaoMaisRecente) {
@@ -85,6 +93,13 @@ class FeedViewModel extends ChangeNotifier {
     } else {
       _denunciasFiltradas.sort((a, b) => (a.createdAt ?? DateTime.now()).compareTo(b.createdAt ?? DateTime.now()));
     }
+  }
+
+  @visibleForTesting
+  void carregarDenunciasLocais(List<Denuncia> denuncias) {
+    _allDenuncias = denuncias;
+    _aplicarFiltrosEOrdenacao();
+    notifyListeners();
   }
 
   String formatarTempo(DateTime? data) {
