@@ -11,6 +11,7 @@ void main() {
         'localizacao': 'IC-3',
         'autor': 'Maria',
         'created_at': '2024-01-15T10:00:00.000Z',
+        'categoria': 'Infraestrutura',
       };
 
       final denuncia = Denuncia.fromJson(json);
@@ -21,6 +22,7 @@ void main() {
       expect(denuncia.localizacao, equals('IC-3'));
       expect(denuncia.autor, equals('Maria'));
       expect(denuncia.createdAt, equals(DateTime.parse('2024-01-15T10:00:00.000Z')));
+      expect(denuncia.categoria, equals('Infraestrutura'));
     });
 
     test('usa "Anônimo" quando autor é nulo', () {
@@ -52,6 +54,37 @@ void main() {
 
       expect(denuncia.createdAt, isNull);
     });
+
+    test('usa "Outros" quando categoria é nula', () {
+      final json = {
+        'id': 'abc-123',
+        'titulo': 'Título',
+        'descricao': 'Descrição',
+        'localizacao': 'Local',
+        'autor': 'João',
+        'created_at': null,
+        'categoria': null,
+      };
+
+      final denuncia = Denuncia.fromJson(json);
+
+      expect(denuncia.categoria, equals('Outros'));
+    });
+
+    test('usa "Outros" quando categoria está ausente do json', () {
+      final json = {
+        'id': 'abc-123',
+        'titulo': 'Título',
+        'descricao': 'Descrição',
+        'localizacao': 'Local',
+        'autor': 'João',
+        'created_at': null,
+      };
+
+      final denuncia = Denuncia.fromJson(json);
+
+      expect(denuncia.categoria, equals('Outros'));
+    });
   });
 
   group('Denuncia.toJson', () {
@@ -82,6 +115,31 @@ void main() {
 
       expect(json.containsKey('id'), isFalse);
       expect(json.containsKey('created_at'), isFalse);
+    });
+
+    test('inclui categoria no json', () {
+      final denuncia = Denuncia(
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+        categoria: 'Segurança',
+      );
+
+      final json = denuncia.toJson();
+
+      expect(json['categoria'], equals('Segurança'));
+    });
+
+    test('usa "Outros" como categoria padrão no toJson', () {
+      final denuncia = Denuncia(
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+      );
+
+      final json = denuncia.toJson();
+
+      expect(json['categoria'], equals('Outros'));
     });
   });
 }
