@@ -50,4 +50,21 @@ void main() {
     await tester.pumpWidget(buildCard(denunciaAnonima));
     expect(find.text('Anônimo'), findsOneWidget);
   });
+
+  testWidgets('exibe a categoria padrão "Outros"', (tester) async {
+    await tester.pumpWidget(buildCard(denunciaBase));
+    expect(find.text('Outros'), findsOneWidget);
+  });
+
+  testWidgets('exibe categoria não-padrão corretamente', (tester) async {
+    final denunciaComCategoria = Denuncia(
+      titulo: 'Porta arrombada',
+      descricao: 'Porta do banheiro feminino foi arrombada',
+      localizacao: 'IC-3',
+      autor: 'João',
+      categoria: 'Segurança',
+    );
+    await tester.pumpWidget(buildCard(denunciaComCategoria));
+    expect(find.text('Segurança'), findsOneWidget);
+  });
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../models/denuncia.dart';
 import '../viewmodels/denuncia_viewmodel.dart';
 
 class FormularioDenunciaScreen extends StatefulWidget {
@@ -133,6 +134,31 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           label: "Localização / Prédio *",
                           icon: Icons.location_on_outlined,
                           validator: viewModel.validarObrigatorio,
+                        ),
+
+                        // CATEGORIA
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: DropdownButtonFormField<String>(
+                            initialValue: viewModel.categoriaSelecionada,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              prefixIcon: Icon(Icons.category_outlined, color: Colors.blueGrey[400]),
+                              labelText: "Categoria *",
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: BorderSide(color: Colors.grey[300]!),
+                              ),
+                            ),
+                            items: categoriasDenuncia
+                                .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                                .toList(),
+                            onChanged: (valor) {
+                              if (valor != null) viewModel.selecionarCategoria(valor);
+                            },
+                          ),
                         ),
 
                         // 🗺️ SELETOR DE COORDENADAS GPS (História 1.2)

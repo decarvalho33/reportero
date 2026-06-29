@@ -64,6 +64,25 @@ class DenunciaCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
 
+            // Categoria
+            Chip(
+              label: Text(
+                denuncia.categoria,
+                style: const TextStyle(
+                  color: Color(0xFF37474F),
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              backgroundColor: Colors.blueGrey[50],
+              side: BorderSide(color: Colors.blueGrey[200]!),
+              padding: EdgeInsets.zero,
+              labelPadding: const EdgeInsets.symmetric(horizontal: 8),
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+            ),
+            const SizedBox(height: 6),
+
             // Localização textual
             Row(
               children: [
