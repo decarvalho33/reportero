@@ -5,11 +5,13 @@ import '../../models/denuncia.dart';
 class DenunciaCard extends StatelessWidget {
   final Denuncia denuncia;
   final String tempoRelativo;
+  final VoidCallback onApoiar;
   /// Construtor do widget DenunciaCard, que recebe uma denúncia e o tempo relativo para exibição.
   const DenunciaCard({
     super.key,
     required this.denuncia,
     required this.tempoRelativo,
+    required this.onApoiar,
   });
 
   @override
@@ -176,6 +178,32 @@ class DenunciaCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 14, color: Colors.grey[700], height: 1.4),
             ),
+
+            const SizedBox(height: 12),
+            const Divider(),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  onPressed: onApoiar,
+                  icon: Icon(
+                    denuncia.jaApoiei
+                        ? Icons.thumb_up
+                        : Icons.thumb_up_outlined,
+                    color: denuncia.jaApoiei
+                        ? Colors.blue
+                      : Colors.grey,
+                  ),
+                ),
+                Text(
+                  '${denuncia.totalApoios}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),    
           ],
         ),
       ),

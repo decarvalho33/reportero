@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import '../models/denuncia.dart';
 import '../services/denuncia_service.dart';
 
+enum TipoOrdenacao {
+  recente,
+  antiga,
+  apoios,
+}
+
 class FeedViewModel extends ChangeNotifier {
   final _service = DenunciaService();
   
@@ -10,13 +16,13 @@ class FeedViewModel extends ChangeNotifier {
   
   bool _isLoading = false;
   String? _erro;
-  bool _ordenacaoMaisRecente = true; /// Controle de estado da ordenação
+  TipoOrdenacao _tipoOrdenacao = TipoOrdenacao.recente; /// Controle de estado da ordenação
   String _filtroTexto = ""; /// Estado do filtro de busca
 
   List<Denuncia> get denuncias => _denunciasFiltradas;
   bool get isLoading => _isLoading;
   String? get erro => _erro; 
-  bool get ordenacaoMaisRecente => _ordenacaoMaisRecente;
+  TipoOrdenacao get tipoOrdenacao => _tipoOrdenacao;
 
   /// Carrega as denúncias do Supabase, aplicando filtros e ordenação conforme o estado atual.
   Future<void> carregarDenuncias() async {
@@ -51,8 +57,8 @@ class FeedViewModel extends ChangeNotifier {
   }
 
   /// Alterna o estado de ordenação (Mais recentes vs Antigas) 
-  void alternarOrdenacao() {
-    _ordenacaoMaisRecente = !_ordenacaoMaisRecente;
+  void alternarOrdenacao(TipoOrdenacao tipo) {
+    _tipoOrdenacao = tipo;
     _aplicarFiltrosEOrdenacao();
     notifyListeners();
   }
@@ -62,6 +68,44 @@ class FeedViewModel extends ChangeNotifier {
     _filtroTexto = texto.toLowerCase();
     _aplicarFiltrosEOrdenacao();
     notifyListeners();
+  }
+
+  Future<void> alternarApoio(Denuncia denuncia) async {
+    try {
+      if (denuncia.jaApoiei) {
+        await _service.removerApoio(denuncia.id!);
+
+        final atualizada = denuncia.copyWith(
+          jaApoiei: false,
+          totalApoios: denuncia.totalApoios - 1,
+        );
+
+        _substituirDenuncia(atualizada);
+      } else {
+        await _service.apoiar(denuncia.id!);
+
+        final atualizada = denuncia.copyWith(
+          jaApoiei: true,
+          totalApoios: denuncia.totalApoios + 1,
+        );
+
+        _substituirDenuncia(atualizada);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Erro ao atualizar apoio: $e");
+    }
+  }
+
+  void _substituirDenuncia(Denuncia atualizada) {
+    final index = _allDenuncias.indexWhere((d) => d.id == atualizada.id);
+
+    if (index != -1) {
+      _allDenuncias[index] = atualizada;
+    }
+
+    _aplicarFiltrosEOrdenacao();
   }
 
   /// Lógica interna para processar os dados em memória
@@ -77,11 +121,36 @@ class FeedViewModel extends ChangeNotifier {
       }).toList();
     }
 
-    /// Aplicar Ordenação Cronológica
-    if (_ordenacaoMaisRecente) {
-      _denunciasFiltradas.sort((a, b) => (b.createdAt ?? DateTime.now()).compareTo(a.createdAt ?? DateTime.now()));
-    } else {
-      _denunciasFiltradas.sort((a, b) => (a.createdAt ?? DateTime.now()).compareTo(b.createdAt ?? DateTime.now()));
+    switch (_tipoOrdenacao) {
+
+      case TipoOrdenacao.recente:
+        _denunciasFiltradas.sort(
+          (a, b) => (b.createdAt ?? DateTime.now())
+              .compareTo(a.createdAt ?? DateTime.now()),
+        );
+        break;
+
+      case TipoOrdenacao.antiga:
+        _denunciasFiltradas.sort(
+          (a, b) => (a.createdAt ?? DateTime.now())
+              .compareTo(b.createdAt ?? DateTime.now()),
+        );
+        break;
+
+      case TipoOrdenacao.apoios:
+        _denunciasFiltradas.sort((a, b) {
+
+          final comparacao = b.totalApoios.compareTo(a.totalApoios);
+
+          if (comparacao != 0) {
+            return comparacao;
+          }
+
+          return (b.createdAt ?? DateTime.now())
+              .compareTo(a.createdAt ?? DateTime.now());
+        });
+
+        break;
     }
   }
 

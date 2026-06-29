@@ -15,7 +15,7 @@ void main() {
   Widget buildCard(Denuncia denuncia, {String tempo = 'há 5min'}) {
     return MaterialApp(
       home: Scaffold(
-        body: DenunciaCard(denuncia: denuncia, tempoRelativo: tempo),
+        body: DenunciaCard(denuncia: denuncia, tempoRelativo: tempo, onApoiar: () {}, ),
       ),
     );
   }

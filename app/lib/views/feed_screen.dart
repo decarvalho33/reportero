@@ -41,11 +41,34 @@ class _FeedScreenState extends State<FeedScreen> {
             pinned: true,
             backgroundColor: const Color(0xFF37474F),
             actions: [
+              
+              PopupMenuButton<TipoOrdenacao>(
+                icon: const Icon(Icons.sort, color: Colors.white),
+                onSelected: _viewModel.alternarOrdenacao,
+                itemBuilder: (context) => const [
+
+                  PopupMenuItem(
+                    value: TipoOrdenacao.recente,
+                    child: Text("Mais recentes"),
+                  ),
+
+                  PopupMenuItem(
+                    value: TipoOrdenacao.antiga,
+                    child: Text("Mais antigas"),
+                  ),
+
+                  PopupMenuItem(
+                    value: TipoOrdenacao.apoios,
+                    child: Text("Mais apoiadas"),
+                  ),
+                ],
+              ),
+
               IconButton(
                 icon: const Icon(Icons.add_circle_outline, color: Colors.white),
                 tooltip: 'Nova Denúncia',
                 onPressed: () => Navigator.pushNamed(context, '/nova'),
-              ),
+              ),  
             ],
             flexibleSpace: FlexibleSpaceBar(
               title: const Text(
@@ -110,6 +133,7 @@ class _FeedScreenState extends State<FeedScreen> {
                   return DenunciaCard(
                     denuncia: denuncia,
                     tempoRelativo: _viewModel.formatarTempo(denuncia.createdAt),
+                    onApoiar: () => _viewModel.alternarApoio(denuncia),
                   );
                 },
                 childCount: _viewModel.denuncias.length,
