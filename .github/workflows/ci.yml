@@ -42,7 +42,7 @@ jobs:
 
       - name: Executar testes unitários e de widget
         working-directory: app
-        run: flutter test test/models test/viewmodels test/widget_test.dart
+        run: flutter test test/models test/viewmodels test/services test/widget_test.dart
 
       - name: Executar testes de integração
         working-directory: app

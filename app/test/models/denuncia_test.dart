@@ -84,4 +84,69 @@ void main() {
       expect(json.containsKey('created_at'), isFalse);
     });
   });
+
+  group('Denuncia.totalApoios', () {
+    test('extrai a contagem do agregado do Supabase (apoios: [{count: N}])', () {
+      final json = {
+        'id': 'abc-123',
+        'titulo': 'Título',
+        'descricao': 'Descrição',
+        'localizacao': 'Local',
+        'apoios': [
+          {'count': 7},
+        ],
+      };
+
+      final denuncia = Denuncia.fromJson(json);
+
+      expect(denuncia.totalApoios, equals(7));
+    });
+
+    test('usa 0 quando o campo apoios está ausente', () {
+      final json = {
+        'id': 'abc-123',
+        'titulo': 'Título',
+        'descricao': 'Descrição',
+        'localizacao': 'Local',
+      };
+
+      final denuncia = Denuncia.fromJson(json);
+
+      expect(denuncia.totalApoios, equals(0));
+      expect(denuncia.jaApoiei, isFalse);
+    });
+
+    test('usa 0 quando a lista de apoios vem vazia', () {
+      final json = {
+        'id': 'abc-123',
+        'titulo': 'Título',
+        'descricao': 'Descrição',
+        'localizacao': 'Local',
+        'apoios': <Map<String, dynamic>>[],
+      };
+
+      final denuncia = Denuncia.fromJson(json);
+
+      expect(denuncia.totalApoios, equals(0));
+    });
+  });
+
+  group('Denuncia.copyWith', () {
+    test('altera jaApoiei preservando os demais campos', () {
+      final original = Denuncia(
+        id: 'abc-123',
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+        totalApoios: 3,
+      );
+
+      final copia = original.copyWith(jaApoiei: true);
+
+      expect(copia.jaApoiei, isTrue);
+      expect(copia.totalApoios, equals(3));
+      expect(copia.id, equals('abc-123'));
+      expect(copia.titulo, equals('Título'));
+    });
+  });
 }
