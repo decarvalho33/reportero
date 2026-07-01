@@ -17,13 +17,11 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
   @override
   void initState() {
     super.initState();
-    // Vincula as mudanças da ViewModel para atualizar a tela
     viewModel.addListener(() {
       if (mounted) setState(() {});
     });
   }
 
-  // Função nativa para selecionar a imagem da galeria/disco (História 1.5)
   Future<void> _selecionarFoto() async {
     try {
       final XFile? imagem = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
@@ -76,13 +74,13 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/background.jpg'), 
+                image: AssetImage('assets/background.jpg'),
                 fit: BoxFit.cover,
-                opacity: 0.08, 
+                opacity: 0.08,
               ),
             ),
           ),
-          
+
           CustomScrollView(
             slivers: [
               SliverAppBar(
@@ -92,16 +90,16 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                 backgroundColor: const Color(0xFF37474F),
                 flexibleSpace: FlexibleSpaceBar(
                   title: const Text(
-                    "Reportero Unicamp", 
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
+                    "Reportero Unicamp",
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                   ),
                   background: Image.asset(
-                    'assets/header.jpg', 
+                    'assets/header.jpg',
                     fit: BoxFit.cover,
                     color: Colors.black.withOpacity(0.3),
                     colorBlendMode: BlendMode.darken,
-                    errorBuilder: (context, error, stackTrace) => 
-                      Container(color: const Color(0xFF455A64)),
+                    errorBuilder: (context, error, stackTrace) =>
+                        Container(color: const Color(0xFF455A64)),
                   ),
                 ),
               ),
@@ -115,12 +113,11 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          "Nova Ocorrência", 
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF37474F))
+                          "Nova Ocorrência",
+                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF37474F)),
                         ),
                         const SizedBox(height: 24),
-                        
-                        // TÍTULO
+
                         _buildInput(
                           controller: viewModel.tituloCtrl,
                           label: "Título da Ocorrência *",
@@ -128,7 +125,6 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           validator: viewModel.validarObrigatorio,
                         ),
 
-                        // LOCALIZAÇÃO (TEXTO)
                         _buildInput(
                           controller: viewModel.localCtrl,
                           label: "Localização / Prédio *",
@@ -136,32 +132,43 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           validator: viewModel.validarObrigatorio,
                         ),
 
-                        // CATEGORIA
                         Padding(
                           padding: const EdgeInsets.only(bottom: 16),
-                          child: DropdownButtonFormField<String>(
-                            initialValue: viewModel.categoriaSelecionada,
+                          child: DropdownButtonFormField<Categoria>(
+                            value: viewModel.categoriaSelecionada,
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: Colors.white,
                               prefixIcon: Icon(Icons.category_outlined, color: Colors.blueGrey[400]),
-                              labelText: "Categoria *",
+                              labelText: "Categoria do Incidente *",
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(color: Colors.grey[300]!),
                               ),
                             ),
-                            items: categoriasDenuncia
-                                .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                                .toList(),
-                            onChanged: (valor) {
-                              if (valor != null) viewModel.selecionarCategoria(valor);
+                            isExpanded: true,
+                            selectedItemBuilder: (BuildContext context) {
+                              return Categoria.values.map<Widget>((Categoria cat) {
+                                return Text(cat.label, style: const TextStyle(fontSize: 15));
+                              }).toList();
+                            },
+                            items: Categoria.values.map((Categoria cat) {
+                              return DropdownMenuItem<Categoria>(
+                                value: cat,
+                                child: ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  title: Text(cat.label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                                  subtitle: Text(cat.descricao, style: const TextStyle(fontSize: 11, height: 1.2)),
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (Categoria? nova) {
+                              if (nova != null) viewModel.definirCategoria(nova);
                             },
                           ),
                         ),
 
-                        // 🗺️ SELETOR DE COORDENADAS GPS (História 1.2)
                         Card(
                           margin: const EdgeInsets.only(bottom: 16),
                           elevation: 1,
@@ -169,10 +176,13 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           child: SwitchListTile(
                             title: const Text('Anexar Coordenadas GPS', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
                             subtitle: Text(
-                              viewModel.latitude != null 
-                                ? 'Lat: ${viewModel.latitude}, Lon: ${viewModel.longitude}'
-                                : 'Inserir localização exata via mapa/satélite',
-                              style: TextStyle(color: viewModel.latitude != null ? Colors.green[700] : Colors.grey[600], fontSize: 12),
+                              viewModel.latitude != null
+                                  ? 'Lat: ${viewModel.latitude}, Lon: ${viewModel.longitude}'
+                                  : 'Inserir localização exata via mapa/satélite',
+                              style: TextStyle(
+                                color: viewModel.latitude != null ? Colors.green[700] : Colors.grey[600],
+                                fontSize: 12,
+                              ),
                             ),
                             value: viewModel.latitude != null,
                             activeColor: const Color(0xFF2E7D32),
@@ -180,7 +190,6 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           ),
                         ),
 
-                        // 📸 SELETOR DE IMAGEM EXTERNA (História 1.5)
                         Card(
                           margin: const EdgeInsets.only(bottom: 16),
                           elevation: 1,
@@ -213,14 +222,12 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           ),
                         ),
 
-                        // AUTOR (OPCIONAL)
                         _buildInput(
                           controller: viewModel.autorCtrl,
                           label: "Seu Nome (Opcional)",
                           icon: Icons.person_outline,
                         ),
 
-                        // DESCRIÇÃO
                         _buildInput(
                           controller: viewModel.descCtrl,
                           label: "Descrição do Incidente *",
@@ -230,8 +237,7 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                         ),
 
                         const SizedBox(height: 24),
-                        
-                        // BOTÃO DE ENVIO COM FEEDBACK DE PROGRESSO
+
                         SizedBox(
                           width: double.infinity,
                           height: 55,
@@ -243,11 +249,11 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
                             child: viewModel.isLoading
-                              ? const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2,)))
-                              : const Text(
-                                  "REGISTRAR DENÚNCIA", 
-                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
-                                ),
+                                ? const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)))
+                                : const Text(
+                                    "REGISTRAR DENÚNCIA",
+                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                  ),
                           ),
                         ),
                         const SizedBox(height: 50),
@@ -255,7 +261,7 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ],

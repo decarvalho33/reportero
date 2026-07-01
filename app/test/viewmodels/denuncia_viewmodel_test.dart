@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:app/models/denuncia.dart';
 import 'package:app/viewmodels/denuncia_viewmodel.dart';
 
 void main() {
@@ -41,31 +42,31 @@ void main() {
       expect(viewModel.autorCtrl.text, isEmpty);
     });
 
-    test('reseta categoria para "Outros"', () {
-      viewModel.selecionarCategoria('Segurança');
-      expect(viewModel.categoriaSelecionada, equals('Segurança'));
+    test('reseta categoria para Categoria.outros', () {
+      viewModel.definirCategoria(Categoria.seguranca);
+      expect(viewModel.categoriaSelecionada, equals(Categoria.seguranca));
 
       viewModel.limpar();
 
-      expect(viewModel.categoriaSelecionada, equals('Outros'));
+      expect(viewModel.categoriaSelecionada, equals(Categoria.outros));
     });
   });
 
   group('categoria', () {
-    test('valor padrão é "Outros"', () {
-      expect(viewModel.categoriaSelecionada, equals('Outros'));
+    test('valor padrão é Categoria.outros', () {
+      expect(viewModel.categoriaSelecionada, equals(Categoria.outros));
     });
 
-    test('selecionarCategoria atualiza o estado', () {
-      viewModel.selecionarCategoria('Infraestrutura');
-      expect(viewModel.categoriaSelecionada, equals('Infraestrutura'));
+    test('definirCategoria atualiza o estado', () {
+      viewModel.definirCategoria(Categoria.infraestrutura);
+      expect(viewModel.categoriaSelecionada, equals(Categoria.infraestrutura));
     });
 
-    test('selecionarCategoria notifica listeners', () {
+    test('definirCategoria notifica listeners', () {
       var notificou = false;
       viewModel.addListener(() => notificou = true);
 
-      viewModel.selecionarCategoria('Serviços');
+      viewModel.definirCategoria(Categoria.servicos);
 
       expect(notificou, isTrue);
     });

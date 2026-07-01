@@ -2,23 +2,29 @@ import 'package:flutter/material.dart';
 import '../models/denuncia.dart';
 import '../services/denuncia_service.dart';
 
+enum TipoOrdenacao {
+  recente,
+  antiga,
+  apoios,
+}
+
 class FeedViewModel extends ChangeNotifier {
   final _service = DenunciaService();
 
-  List<Denuncia> _allDenuncias = []; // Cache completo vindo do Supabase
-  List<Denuncia> _denunciasFiltradas = []; // Lista exibida na tela
+  List<Denuncia> _allDenuncias = [];
+  List<Denuncia> _denunciasFiltradas = [];
 
   bool _isLoading = false;
   String? _erro;
-  bool _ordenacaoMaisRecente = true; // Controle de estado da ordenação
+  TipoOrdenacao _tipoOrdenacao = TipoOrdenacao.recente;
   String _filtroTexto = "";
-  String? _filtroCategoria; // null = todas as categorias
+  Categoria? _filtroCategoria;
 
   List<Denuncia> get denuncias => _denunciasFiltradas;
   bool get isLoading => _isLoading;
   String? get erro => _erro;
-  bool get ordenacaoMaisRecente => _ordenacaoMaisRecente;
-  String? get filtroCategoria => _filtroCategoria;
+  TipoOrdenacao get tipoOrdenacao => _tipoOrdenacao;
+  Categoria? get filtroCategoria => _filtroCategoria;
 
   Future<void> carregarDenuncias() async {
     _isLoading = true;
@@ -26,11 +32,7 @@ class FeedViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 1. Busca os dados reais do banco que o João configurou
       _allDenuncias = await _service.obtenerDenuncias();
-
-      // 2. 🔥 INJEÇÃO DE TESTE: Criamos uma denúncia falsa com foto e coordenadas
-      // para garantir que seu frontend funciona mesmo se o banco só tiver dados velhos.
       _allDenuncias.insert(0, Denuncia(
         id: "teste_mock_axel",
         titulo: "Lâmpada Quebrada na Unicamp",
@@ -39,11 +41,9 @@ class FeedViewModel extends ChangeNotifier {
         autor: "Axel (Teste Frontend)",
         latitude: -22.8184,
         longitude: -47.0647,
-        fotoUrl: "https://picsum.photos/400/200", // Foto de teste aleatória
+        fotoUrl: "https://picsum.photos/400/200",
         createdAt: DateTime.now(),
       ));
-
-      // 3. Organiza a lista aplicando a busca e ordenação atuais
       _aplicarFiltrosEOrdenacao();
     } catch (e) {
       _erro = "Erro ao carregar denúncias";
@@ -54,28 +54,53 @@ class FeedViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Alterna o estado de ordenação (Mais recentes vs Antigas) - História 2.3
-  void alternarOrdenacao() {
-    _ordenacaoMaisRecente = !_ordenacaoMaisRecente;
+  void alternarOrdenacao(TipoOrdenacao tipo) {
+    _tipoOrdenacao = tipo;
     _aplicarFiltrosEOrdenacao();
     notifyListeners();
   }
 
-  // Define o termo de busca para a filtragem - História 2.4
   void filtrarPorTexto(String texto) {
     _filtroTexto = texto.toLowerCase();
     _aplicarFiltrosEOrdenacao();
     notifyListeners();
   }
 
-  // Define a categoria ativa; null remove o filtro de categoria - História 2.4
-  void filtrarPorCategoria(String? categoria) {
+  void filtrarPorCategoria(Categoria? categoria) {
     _filtroCategoria = categoria;
     _aplicarFiltrosEOrdenacao();
     notifyListeners();
   }
 
-  // Lógica interna para processar os dados em memória
+  Future<void> alternarApoio(Denuncia denuncia) async {
+    try {
+      if (denuncia.jaApoiei) {
+        await _service.removerApoio(denuncia.id!);
+        _substituirDenuncia(denuncia.copyWith(
+          jaApoiei: false,
+          totalApoios: denuncia.totalApoios - 1,
+        ));
+      } else {
+        await _service.apoiar(denuncia.id!);
+        _substituirDenuncia(denuncia.copyWith(
+          jaApoiei: true,
+          totalApoios: denuncia.totalApoios + 1,
+        ));
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Erro ao atualizar apoio: $e");
+    }
+  }
+
+  void _substituirDenuncia(Denuncia atualizada) {
+    final index = _allDenuncias.indexWhere((d) => d.id == atualizada.id);
+    if (index != -1) {
+      _allDenuncias[index] = atualizada;
+    }
+    _aplicarFiltrosEOrdenacao();
+  }
+
   void _aplicarFiltrosEOrdenacao() {
     _denunciasFiltradas = _allDenuncias.where((d) {
       final passaTexto = _filtroTexto.isEmpty ||
@@ -87,11 +112,27 @@ class FeedViewModel extends ChangeNotifier {
       return passaTexto && passaCategoria;
     }).toList();
 
-    // Aplicar Ordenação Cronológica
-    if (_ordenacaoMaisRecente) {
-      _denunciasFiltradas.sort((a, b) => (b.createdAt ?? DateTime.now()).compareTo(a.createdAt ?? DateTime.now()));
-    } else {
-      _denunciasFiltradas.sort((a, b) => (a.createdAt ?? DateTime.now()).compareTo(b.createdAt ?? DateTime.now()));
+    switch (_tipoOrdenacao) {
+      case TipoOrdenacao.recente:
+        _denunciasFiltradas.sort(
+          (a, b) => (b.createdAt ?? DateTime.now())
+              .compareTo(a.createdAt ?? DateTime.now()),
+        );
+        break;
+      case TipoOrdenacao.antiga:
+        _denunciasFiltradas.sort(
+          (a, b) => (a.createdAt ?? DateTime.now())
+              .compareTo(b.createdAt ?? DateTime.now()),
+        );
+        break;
+      case TipoOrdenacao.apoios:
+        _denunciasFiltradas.sort((a, b) {
+          final comparacao = b.totalApoios.compareTo(a.totalApoios);
+          if (comparacao != 0) return comparacao;
+          return (b.createdAt ?? DateTime.now())
+              .compareTo(a.createdAt ?? DateTime.now());
+        });
+        break;
     }
   }
 

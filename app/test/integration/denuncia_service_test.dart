@@ -102,4 +102,56 @@ void main() {
       },
     );
   });
+
+  group('DenunciaService — apoios', () {
+    // Insere uma denúncia e devolve o id gerado pelo banco.
+    Future<String> inserirDenuncia(String titulo) async {
+      await service.enviarDenuncia(
+        Denuncia(titulo: titulo, descricao: 'Desc', localizacao: 'IC'),
+      );
+      final lista = await service.obtenerDenuncias();
+      return lista.firstWhere((d) => d.titulo == titulo).id!;
+    }
+
+    test('apoiar registra apoio e reflete em totalApoios/jaApoiei', () async {
+      final id = await inserirDenuncia('Com apoio');
+
+      await service.apoiar(id);
+
+      final resultado = await service.obtenerDenuncias();
+      expect(resultado.first.totalApoios, equals(1));
+      expect(resultado.first.jaApoiei, isTrue);
+    });
+
+    test('apoiar é idempotente (não duplica apoio do mesmo dispositivo)',
+        () async {
+      final id = await inserirDenuncia('Apoio dobrado');
+
+      await service.apoiar(id);
+      await service.apoiar(id); // segunda chamada não deve lançar nem somar
+
+      final resultado = await service.obtenerDenuncias();
+      expect(resultado.first.totalApoios, equals(1));
+    });
+
+    test('removerApoio retira o apoio do dispositivo', () async {
+      final id = await inserirDenuncia('Apoio removido');
+      await service.apoiar(id);
+
+      await service.removerApoio(id);
+
+      final resultado = await service.obtenerDenuncias();
+      expect(resultado.first.totalApoios, equals(0));
+      expect(resultado.first.jaApoiei, isFalse);
+    });
+
+    test('denúncia sem apoios começa com totalApoios 0 e jaApoiei false',
+        () async {
+      await inserirDenuncia('Sem apoio');
+
+      final resultado = await service.obtenerDenuncias();
+      expect(resultado.first.totalApoios, equals(0));
+      expect(resultado.first.jaApoiei, isFalse);
+    });
+  });
 }

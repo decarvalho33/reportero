@@ -4,11 +4,13 @@ import '../../models/denuncia.dart';
 class DenunciaCard extends StatelessWidget {
   final Denuncia denuncia;
   final String tempoRelativo;
+  final VoidCallback onApoiar;
 
   const DenunciaCard({
     super.key,
     required this.denuncia,
     required this.tempoRelativo,
+    required this.onApoiar,
   });
 
   @override
@@ -64,25 +66,6 @@ class DenunciaCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
 
-            // Categoria
-            Chip(
-              label: Text(
-                denuncia.categoria,
-                style: const TextStyle(
-                  color: Color(0xFF37474F),
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              backgroundColor: Colors.blueGrey[50],
-              side: BorderSide(color: Colors.blueGrey[200]!),
-              padding: EdgeInsets.zero,
-              labelPadding: const EdgeInsets.symmetric(horizontal: 8),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              visualDensity: VisualDensity.compact,
-            ),
-            const SizedBox(height: 6),
-
             // Localização textual
             Row(
               children: [
@@ -98,24 +81,68 @@ class DenunciaCard extends StatelessWidget {
               ],
             ),
 
-            // Tag Extra: Coordenadas exatas (Se existirem)
-            if (denuncia.latitude != null && denuncia.longitude != null) ...[
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(Icons.explore_outlined, size: 12, color: Colors.green[600]),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Lat: ${denuncia.latitude!.toStringAsFixed(5)}, Lon: ${denuncia.longitude!.toStringAsFixed(5)}',
-                    style: TextStyle(fontSize: 11, color: Colors.green[700], fontWeight: FontWeight.w500),
+            const SizedBox(height: 6),
+
+            // Metadados: GPS e categoria com tooltip descritivo
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (denuncia.latitude != null && denuncia.longitude != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.green[50],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.explore_outlined, size: 12, color: Colors.green[600]),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Lat: ${denuncia.latitude!.toStringAsFixed(5)}, Lon: ${denuncia.longitude!.toStringAsFixed(5)}',
+                          style: TextStyle(fontSize: 11, color: Colors.green[700], fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-            ],
-            
+
+                Tooltip(
+                  message: denuncia.categoria.descricao,
+                  waitDuration: Duration.zero,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF37474F).withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  textStyle: const TextStyle(color: Colors.white, fontSize: 12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: Colors.blueGrey[50],
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.sell_outlined, size: 12, color: Colors.blueGrey[700]),
+                        const SizedBox(width: 4),
+                        Text(
+                          denuncia.categoria.label,
+                          style: TextStyle(fontSize: 11, color: Colors.blueGrey[800], fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
             const SizedBox(height: 10),
 
-            // Imagem anexada via Supabase Storage (Se existir)
+            // Imagem anexada via Supabase Storage
             if (denuncia.fotoUrl != null && denuncia.fotoUrl!.isNotEmpty) ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
@@ -147,6 +174,26 @@ class DenunciaCard extends StatelessWidget {
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 14, color: Colors.grey[700], height: 1.4),
+            ),
+
+            const SizedBox(height: 12),
+            const Divider(),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                IconButton(
+                  onPressed: onApoiar,
+                  icon: Icon(
+                    denuncia.jaApoiei ? Icons.thumb_up : Icons.thumb_up_outlined,
+                    color: denuncia.jaApoiei ? Colors.blue : Colors.grey,
+                  ),
+                ),
+                Text(
+                  '${denuncia.totalApoios}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ],
         ),

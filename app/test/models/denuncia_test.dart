@@ -11,7 +11,7 @@ void main() {
         'localizacao': 'IC-3',
         'autor': 'Maria',
         'created_at': '2024-01-15T10:00:00.000Z',
-        'categoria': 'Infraestrutura',
+        'categoria': 'infraestrutura',
       };
 
       final denuncia = Denuncia.fromJson(json);
@@ -22,7 +22,7 @@ void main() {
       expect(denuncia.localizacao, equals('IC-3'));
       expect(denuncia.autor, equals('Maria'));
       expect(denuncia.createdAt, equals(DateTime.parse('2024-01-15T10:00:00.000Z')));
-      expect(denuncia.categoria, equals('Infraestrutura'));
+      expect(denuncia.categoria, equals(Categoria.infraestrutura));
     });
 
     test('usa "Anônimo" quando autor é nulo', () {
@@ -55,7 +55,7 @@ void main() {
       expect(denuncia.createdAt, isNull);
     });
 
-    test('usa "Outros" quando categoria é nula', () {
+    test('usa Categoria.outros quando categoria é nula', () {
       final json = {
         'id': 'abc-123',
         'titulo': 'Título',
@@ -68,10 +68,10 @@ void main() {
 
       final denuncia = Denuncia.fromJson(json);
 
-      expect(denuncia.categoria, equals('Outros'));
+      expect(denuncia.categoria, equals(Categoria.outros));
     });
 
-    test('usa "Outros" quando categoria está ausente do json', () {
+    test('usa Categoria.outros quando categoria está ausente do json', () {
       final json = {
         'id': 'abc-123',
         'titulo': 'Título',
@@ -83,7 +83,7 @@ void main() {
 
       final denuncia = Denuncia.fromJson(json);
 
-      expect(denuncia.categoria, equals('Outros'));
+      expect(denuncia.categoria, equals(Categoria.outros));
     });
   });
 
@@ -117,20 +117,20 @@ void main() {
       expect(json.containsKey('created_at'), isFalse);
     });
 
-    test('inclui categoria no json', () {
+    test('serializa categoria como nome do enum', () {
       final denuncia = Denuncia(
         titulo: 'Título',
         descricao: 'Descrição',
         localizacao: 'Local',
-        categoria: 'Segurança',
+        categoria: Categoria.seguranca,
       );
 
       final json = denuncia.toJson();
 
-      expect(json['categoria'], equals('Segurança'));
+      expect(json['categoria'], equals('seguranca'));
     });
 
-    test('usa "Outros" como categoria padrão no toJson', () {
+    test('usa "outros" como categoria padrão no toJson', () {
       final denuncia = Denuncia(
         titulo: 'Título',
         descricao: 'Descrição',
@@ -139,7 +139,72 @@ void main() {
 
       final json = denuncia.toJson();
 
-      expect(json['categoria'], equals('Outros'));
+      expect(json['categoria'], equals('outros'));
+    });
+  });
+
+  group('Denuncia.totalApoios', () {
+    test('extrai a contagem do agregado do Supabase (apoios: [{count: N}])', () {
+      final json = {
+        'id': 'abc-123',
+        'titulo': 'Título',
+        'descricao': 'Descrição',
+        'localizacao': 'Local',
+        'apoios': [
+          {'count': 7},
+        ],
+      };
+
+      final denuncia = Denuncia.fromJson(json);
+
+      expect(denuncia.totalApoios, equals(7));
+    });
+
+    test('usa 0 quando o campo apoios está ausente', () {
+      final json = {
+        'id': 'abc-123',
+        'titulo': 'Título',
+        'descricao': 'Descrição',
+        'localizacao': 'Local',
+      };
+
+      final denuncia = Denuncia.fromJson(json);
+
+      expect(denuncia.totalApoios, equals(0));
+      expect(denuncia.jaApoiei, isFalse);
+    });
+
+    test('usa 0 quando a lista de apoios vem vazia', () {
+      final json = {
+        'id': 'abc-123',
+        'titulo': 'Título',
+        'descricao': 'Descrição',
+        'localizacao': 'Local',
+        'apoios': <Map<String, dynamic>>[],
+      };
+
+      final denuncia = Denuncia.fromJson(json);
+
+      expect(denuncia.totalApoios, equals(0));
+    });
+  });
+
+  group('Denuncia.copyWith', () {
+    test('altera jaApoiei preservando os demais campos', () {
+      final original = Denuncia(
+        id: 'abc-123',
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+        totalApoios: 3,
+      );
+
+      final copia = original.copyWith(jaApoiei: true);
+
+      expect(copia.jaApoiei, isTrue);
+      expect(copia.totalApoios, equals(3));
+      expect(copia.id, equals('abc-123'));
+      expect(copia.titulo, equals('Título'));
     });
   });
 }
