@@ -1,1 +1,0 @@
-ALTER TABLE denuncias ADD COLUMN IF NOT EXISTS categoria TEXT NOT NULL DEFAULT 'Outros';
