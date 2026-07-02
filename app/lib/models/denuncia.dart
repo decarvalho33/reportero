@@ -1,4 +1,3 @@
-/// Enumeração que representa as categorias de denúncias, cada uma com um rótulo e uma descrição detalhada.
 enum Categoria {
   infraestrutura(
     'Infraestrutura',
@@ -16,6 +15,10 @@ enum Categoria {
     'Acessibilidade',
     'Rampas bloqueadas, pisos táteis danificados, elevadores quebrados ou falta de acesso.',
   ),
+  servicos(
+    'Serviços',
+    'Transporte, atendimento, burocracia ou falhas em serviços prestados no campus.',
+  ),
   outros(
     'Outros',
     'Qualquer outra ocorrência ou problema que não se encaixe nas opções acima.',
@@ -25,7 +28,6 @@ enum Categoria {
   final String descricao;
   const Categoria(this.label, this.descricao);
 
-  /// Converte uma string do banco de dados em um valor da enumeração Categoria. Se o valor não corresponder a nenhuma categoria, retorna Categoria.outros.
   static Categoria fromBanco(String? valor) {
     return Categoria.values.firstWhere(
       (e) => e.name.toLowerCase() == valor?.toLowerCase(),
@@ -34,7 +36,6 @@ enum Categoria {
   }
 }
 
-/// Modelo de dados para representar uma denúncia, incluindo informações como título, descrição, localização, autor, coordenadas geográficas, URL da foto e data de criação.
 class Denuncia {
   final String? id;
   final String titulo;
@@ -46,14 +47,9 @@ class Denuncia {
   final double? longitude;
   final String? fotoUrl;
   final DateTime? createdAt;
-
-  /// Quantidade total de apoios (upvotes) recebidos pela denúncia.
   final int totalApoios;
-
-  /// Indica se o dispositivo atual já apoiou esta denúncia (preenchido pelo serviço).
   final bool jaApoiei;
 
-  /// Construtor da classe Denuncia, que inicializa os campos obrigatórios e opcionais.
   Denuncia({
     this.id,
     required this.titulo,
@@ -69,7 +65,6 @@ class Denuncia {
     this.jaApoiei = false,
   });
 
-  /// Cria uma instância de Denuncia a partir de um mapa JSON.
   factory Denuncia.fromJson(Map<String, dynamic> json) {
     return Denuncia(
       id: json['id'],
@@ -88,10 +83,8 @@ class Denuncia {
     );
   }
 
-  /// Extrai a contagem de apoios da consulta agregada do Supabase.
-  ///
-  /// Com `select('*, apoios(count)')` o PostgREST retorna `apoios: [{count: N}]`.
-  /// Também aceita um inteiro direto e cai para 0 quando o campo está ausente.
+  // Com select('*, apoios(count)') o PostgREST retorna apoios: [{count: N}].
+  // Também aceita inteiro direto e cai para 0 quando o campo está ausente.
   static int _parseTotalApoios(dynamic apoios) {
     if (apoios is int) return apoios;
     if (apoios is List && apoios.isNotEmpty) {
@@ -103,7 +96,6 @@ class Denuncia {
     return 0;
   }
 
-  /// Cria uma cópia da denúncia alterando apenas os campos informados.
   Denuncia copyWith({int? totalApoios, bool? jaApoiei}) {
     return Denuncia(
       id: id,
@@ -121,7 +113,6 @@ class Denuncia {
     );
   }
 
-  /// Converte a instância em um mapa JSON.
   Map<String, dynamic> toJson() {
     return {
       'titulo': titulo,

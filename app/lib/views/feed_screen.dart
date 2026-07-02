@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import '../models/denuncia.dart';
 import '../viewmodels/feed_viewmodel.dart';
 import 'widgets/denuncia_card.dart';
 
-/// Tela principal do aplicativo, exibindo o feed de denúncias com suporte a ordenação, filtragem e navegação para o formulário de nova denúncia.
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
 
@@ -10,7 +10,6 @@ class FeedScreen extends StatefulWidget {
   State<FeedScreen> createState() => _FeedScreenState();
 }
 
-/// Estado da tela FeedScreen, responsável por gerenciar a exibição das denúncias, estado de carregamento e interação com o ViewModel.
 class _FeedScreenState extends State<FeedScreen> {
   final _viewModel = FeedViewModel();
 
@@ -27,48 +26,41 @@ class _FeedScreenState extends State<FeedScreen> {
     super.dispose();
   }
 
-/// Construtor do widget FeedScreen, que inicializa o estado e configura o ViewModel para carregar as denúncias.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: CustomScrollView(
         slivers: [
-          /// Header igual ao formulário
           SliverAppBar(
             expandedHeight: 200.0,
             floating: false,
             pinned: true,
             backgroundColor: const Color(0xFF37474F),
             actions: [
-              
               PopupMenuButton<TipoOrdenacao>(
                 icon: const Icon(Icons.sort, color: Colors.white),
                 onSelected: _viewModel.alternarOrdenacao,
                 itemBuilder: (context) => const [
-
                   PopupMenuItem(
                     value: TipoOrdenacao.recente,
                     child: Text("Mais recentes"),
                   ),
-
                   PopupMenuItem(
                     value: TipoOrdenacao.antiga,
                     child: Text("Mais antigas"),
                   ),
-
                   PopupMenuItem(
                     value: TipoOrdenacao.apoios,
                     child: Text("Mais apoiadas"),
                   ),
                 ],
               ),
-
               IconButton(
                 icon: const Icon(Icons.add_circle_outline, color: Colors.white),
                 tooltip: 'Nova Denúncia',
                 onPressed: () => Navigator.pushNamed(context, '/nova'),
-              ),  
+              ),
             ],
             flexibleSpace: FlexibleSpaceBar(
               title: const Text(
@@ -86,7 +78,23 @@ class _FeedScreenState extends State<FeedScreen> {
             ),
           ),
 
-          /// Conteúdo
+          // Chips de filtro por categoria
+          SliverToBoxAdapter(
+            child: Container(
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildCategoriaChip('Todas', null),
+                    ...Categoria.values.map((c) => _buildCategoriaChip(c.label, c)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
           if (_viewModel.isLoading)
             const SliverFillRemaining(
               child: Center(child: CircularProgressIndicator()),
@@ -118,7 +126,9 @@ class _FeedScreenState extends State<FeedScreen> {
                     Icon(Icons.inbox_outlined, color: Colors.grey[400], size: 48),
                     const SizedBox(height: 12),
                     Text(
-                      'Nenhuma denúncia registrada ainda.',
+                      _viewModel.filtroCategoria != null
+                          ? 'Nenhuma denúncia encontrada para esta categoria.'
+                          : 'Nenhuma denúncia registrada ainda.',
                       style: TextStyle(color: Colors.grey[600]),
                     ),
                   ],
@@ -144,13 +154,33 @@ class _FeedScreenState extends State<FeedScreen> {
         ],
       ),
 
-      /// FAB para nova denúncia
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.pushNamed(context, '/nova'),
         backgroundColor: const Color(0xFF2E7D32),
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: const Text('Nova Denúncia'),
+      ),
+    );
+  }
+
+  Widget _buildCategoriaChip(String label, Categoria? categoria) {
+    final selecionado = _viewModel.filtroCategoria == categoria;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: selecionado,
+        onSelected: (_) => _viewModel.filtrarPorCategoria(selecionado ? null : categoria),
+        selectedColor: const Color(0xFF37474F),
+        backgroundColor: Colors.white,
+        side: BorderSide(color: Colors.blueGrey[200]!),
+        labelStyle: TextStyle(
+          color: selecionado ? Colors.white : const Color(0xFF37474F),
+          fontWeight: FontWeight.w500,
+          fontSize: 13,
+        ),
+        showCheckmark: false,
       ),
     );
   }

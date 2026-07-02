@@ -15,7 +15,7 @@ void main() {
   Widget buildCard(Denuncia denuncia, {String tempo = 'há 5min'}) {
     return MaterialApp(
       home: Scaffold(
-        body: DenunciaCard(denuncia: denuncia, tempoRelativo: tempo, onApoiar: () {}, ),
+        body: DenunciaCard(denuncia: denuncia, tempoRelativo: tempo, onApoiar: () {}),
       ),
     );
   }
@@ -49,5 +49,22 @@ void main() {
     );
     await tester.pumpWidget(buildCard(denunciaAnonima));
     expect(find.text('Anônimo'), findsOneWidget);
+  });
+
+  testWidgets('exibe o label da categoria padrão', (tester) async {
+    await tester.pumpWidget(buildCard(denunciaBase));
+    expect(find.text('Outros'), findsOneWidget);
+  });
+
+  testWidgets('exibe o label de categoria não-padrão corretamente', (tester) async {
+    final denunciaComCategoria = Denuncia(
+      titulo: 'Porta arrombada',
+      descricao: 'Porta do banheiro feminino foi arrombada',
+      localizacao: 'IC-3',
+      autor: 'João',
+      categoria: Categoria.seguranca,
+    );
+    await tester.pumpWidget(buildCard(denunciaComCategoria));
+    expect(find.text('Segurança'), findsOneWidget);
   });
 }

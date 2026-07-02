@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../models/denuncia.dart';
 
-/// Widget que representa visualmente uma denúncia, exibindo informações como título, descrição, localização, autor, tempo relativo e imagem anexada (se houver).
 class DenunciaCard extends StatelessWidget {
   final Denuncia denuncia;
   final String tempoRelativo;
   final VoidCallback onApoiar;
-  /// Construtor do widget DenunciaCard, que recebe uma denúncia e o tempo relativo para exibição.
+
   const DenunciaCard({
     super.key,
     required this.denuncia,
@@ -56,7 +55,7 @@ class DenunciaCard extends StatelessWidget {
 
             const Divider(height: 20),
 
-            /// Título
+            // Título
             Text(
               denuncia.titulo,
               style: const TextStyle(
@@ -67,7 +66,7 @@ class DenunciaCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
 
-            /// Localização textual
+            // Localização textual
             Row(
               children: [
                 Icon(Icons.location_on_outlined, size: 14, color: Colors.blueGrey[400]),
@@ -84,13 +83,12 @@ class DenunciaCard extends StatelessWidget {
 
             const SizedBox(height: 6),
 
-            /// METADADOS ROW: Coordenadas GPS e Categoria com Tooltip explicativo
+            // Metadados: GPS e categoria com tooltip descritivo
             Wrap(
               spacing: 8,
               runSpacing: 4,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                /// Tag Extra: Coordenadas exatas (Se existirem)
                 if (denuncia.latitude != null && denuncia.longitude != null)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
@@ -111,10 +109,9 @@ class DenunciaCard extends StatelessWidget {
                     ),
                   ),
 
-                /// Categoria com Tooltip Dinâmico
                 Tooltip(
-                  message: denuncia.categoria.descricao, // Pega o texto explicativo de João Pedro
-                  waitDuration: Duration.zero, // Abre imediatamente ao passar o ponteiro do mouse
+                  message: denuncia.categoria.descricao,
+                  waitDuration: Duration.zero,
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: const Color(0xFF37474F).withOpacity(0.95),
@@ -133,7 +130,7 @@ class DenunciaCard extends StatelessWidget {
                         Icon(Icons.sell_outlined, size: 12, color: Colors.blueGrey[700]),
                         const SizedBox(width: 4),
                         Text(
-                          denuncia.categoria.label, // Exibe o texto amigável: "Infraestrutura", "Limpeza", etc.
+                          denuncia.categoria.label,
                           style: TextStyle(fontSize: 11, color: Colors.blueGrey[800], fontWeight: FontWeight.w600),
                         ),
                       ],
@@ -142,10 +139,10 @@ class DenunciaCard extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 10),
 
-            /// Imagem anexada via Supabase Storage (Se existir)
+            // Imagem anexada via Supabase Storage
             if (denuncia.fotoUrl != null && denuncia.fotoUrl!.isNotEmpty) ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
@@ -171,7 +168,7 @@ class DenunciaCard extends StatelessWidget {
               const SizedBox(height: 10),
             ],
 
-            /// Descrição (máx. 3 linhas)
+            // Descrição (máx. 3 linhas)
             Text(
               denuncia.descricao,
               maxLines: 3,
@@ -188,22 +185,16 @@ class DenunciaCard extends StatelessWidget {
                 IconButton(
                   onPressed: onApoiar,
                   icon: Icon(
-                    denuncia.jaApoiei
-                        ? Icons.thumb_up
-                        : Icons.thumb_up_outlined,
-                    color: denuncia.jaApoiei
-                        ? Colors.blue
-                      : Colors.grey,
+                    denuncia.jaApoiei ? Icons.thumb_up : Icons.thumb_up_outlined,
+                    color: denuncia.jaApoiei ? Colors.blue : Colors.grey,
                   ),
                 ),
                 Text(
                   '${denuncia.totalApoios}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],
-            ),    
+            ),
           ],
         ),
       ),

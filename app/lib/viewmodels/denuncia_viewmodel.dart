@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/denuncia.dart';
 import '../services/denuncia_service.dart';
 
-/// ViewModel responsável por gerenciar o estado e a lógica de negócios relacionada ao formulário de denúncia.
 class DenunciaViewModel extends ChangeNotifier {
-  
   final formKey = GlobalKey<FormState>();
   final _service = DenunciaService();
   final tituloCtrl = TextEditingController();
@@ -18,16 +16,12 @@ class DenunciaViewModel extends ChangeNotifier {
   double? _latitude;
   double? _longitude;
   bool _isLoading = false;
-  
-  // NOVA PROPRIEDADE: Categoria selecionada
   Categoria _categoriaSelecionada = Categoria.outros;
 
   Uint8List? get fotoBytes => _fotoBytes;
   double? get latitude => _latitude;
   double? get longitude => _longitude;
   bool get isLoading => _isLoading;
-  
-  // GETTER E SETTER para a Categoria
   Categoria get categoriaSelecionada => _categoriaSelecionada;
 
   void definirCategoria(Categoria novaCategoria) {
@@ -43,7 +37,7 @@ class DenunciaViewModel extends ChangeNotifier {
 
   void alternarLocalizacaoGps(bool ativar) {
     if (ativar) {
-      _latitude = -22.8184; 
+      _latitude = -22.8184;
       _longitude = -47.0647;
     } else {
       _latitude = null;
@@ -70,13 +64,12 @@ class DenunciaViewModel extends ChangeNotifier {
         urlPublicaFoto = await _service.subirFoto(_fotoBytes!, _nomeArquivoFoto!);
       }
 
-      // MODIFICADO: Agora repassa a categoria selecionada da interface
       final novaDenuncia = Denuncia(
         titulo: tituloCtrl.text,
         localizacao: localCtrl.text,
         descricao: descCtrl.text,
         autor: autorCtrl.text.isEmpty ? "Anônimo" : autorCtrl.text,
-        categoria: _categoriaSelecionada, // Campo injetado
+        categoria: _categoriaSelecionada,
         latitude: _latitude,
         longitude: _longitude,
         fotoUrl: urlPublicaFoto,
@@ -103,7 +96,7 @@ class DenunciaViewModel extends ChangeNotifier {
     _nomeArquivoFoto = null;
     _latitude = null;
     _longitude = null;
-    _categoriaSelecionada = Categoria.outros; // Reset da categoria
+    _categoriaSelecionada = Categoria.outros;
     notifyListeners();
   }
 }
