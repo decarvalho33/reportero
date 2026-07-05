@@ -12,6 +12,9 @@ void main() {
         'autor': 'Maria',
         'created_at': '2024-01-15T10:00:00.000Z',
         'categoria': 'infraestrutura',
+        'foto_url': 'https://example.com/foto.jpg',
+        'latitude': -22.8123,
+        'longitude': -47.0654,
       };
 
       final denuncia = Denuncia.fromJson(json);
@@ -23,6 +26,9 @@ void main() {
       expect(denuncia.autor, equals('Maria'));
       expect(denuncia.createdAt, equals(DateTime.parse('2024-01-15T10:00:00.000Z')));
       expect(denuncia.categoria, equals(Categoria.infraestrutura));
+      expect(denuncia.fotoUrl, equals('https://example.com/foto.jpg'));
+      expect(denuncia.latitude, equals(-22.8123));
+      expect(denuncia.longitude, equals(-47.0654));
     });
 
     test('usa "Anônimo" quando autor é nulo', () {
@@ -94,6 +100,10 @@ void main() {
         descricao: 'Lâmpada queimada no corredor',
         localizacao: 'CB',
         autor: 'Ana',
+        categoria: Categoria.seguranca,
+        fotoUrl: 'https://example.com/foto.jpg',
+        latitude: -22.8123,
+        longitude: -47.0654,
       );
 
       final json = denuncia.toJson();
@@ -102,6 +112,10 @@ void main() {
       expect(json['descricao'], equals('Lâmpada queimada no corredor'));
       expect(json['localizacao'], equals('CB'));
       expect(json['autor'], equals('Ana'));
+      expect(json['categoria'], equals('seguranca'));
+      expect(json['foto_url'], equals('https://example.com/foto.jpg'));
+      expect(json['latitude'], equals(-22.8123));
+      expect(json['longitude'], equals(-47.0654));
     });
 
     test('não inclui id nem created_at', () {
