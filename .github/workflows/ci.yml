@@ -29,6 +29,12 @@ jobs:
     name: Testes Automatizados
     runs-on: ubuntu-latest
     needs: build
+    # Os testes de integração usam um único Supabase de teste compartilhado e
+    # limpam a tabela inteira (_limparTabela). Serializamos as execuções para que
+    # duas rodadas de CI nunca mexam no banco ao mesmo tempo e se atropelem.
+    concurrency:
+      group: reportero-integration-db
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
 
