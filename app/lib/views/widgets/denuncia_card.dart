@@ -124,24 +124,35 @@ class DenunciaCard extends StatelessWidget {
                   waitDuration: Duration.zero,
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF37474F).withOpacity(0.95),
+                    color: const Color(0xFF37474F).withValues(alpha: 0.95),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   textStyle: const TextStyle(color: Colors.white, fontSize: 12),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
-                      color: Colors.blueGrey[50],
-                      borderRadius: BorderRadius.circular(4),
+                      color: const Color(0xFF37474F),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF37474F).withValues(alpha: 0.25),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.sell_outlined, size: 12, color: Colors.blueGrey[700]),
-                        const SizedBox(width: 4),
+                        const Icon(Icons.sell, size: 13, color: Colors.white),
+                        const SizedBox(width: 5),
                         Text(
                           denuncia.categoria.label,
-                          style: TextStyle(fontSize: 11, color: Colors.blueGrey[800], fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -152,25 +163,39 @@ class DenunciaCard extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            // Imagem anexada via Supabase Storage
+            // Imagem anexada via Supabase Storage — proporção fixa 2:1 para
+            // manter os cards uniformes e evitar distorção entre fotos.
             if (denuncia.fotoUrl != null && denuncia.fotoUrl!.isNotEmpty) ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  denuncia.fotoUrl!,
-                  width: double.infinity,
-                  height: 160,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    height: 40,
-                    color: Colors.grey[100],
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 8),
-                        Icon(Icons.broken_image_outlined, color: Colors.grey[400], size: 16),
-                        const SizedBox(width: 4),
-                        Text('Erro ao carregar mídia', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
-                      ],
+                child: AspectRatio(
+                  aspectRatio: 2 / 1,
+                  child: Image.network(
+                    denuncia.fotoUrl!,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Container(
+                        color: Colors.grey[100],
+                        alignment: Alignment.center,
+                        child: const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: Colors.grey[100],
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.broken_image_outlined, color: Colors.grey[400], size: 18),
+                          const SizedBox(width: 6),
+                          Text('Erro ao carregar mídia', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                        ],
+                      ),
                     ),
                   ),
                 ),
