@@ -48,12 +48,16 @@ void main() {
       },
     );
 
-    test('enviarDenuncia persiste a denúncia no banco', () async {
+    test('enviarDenuncia persiste a denúncia no banco com todos os campos novos', () async {
       final denuncia = Denuncia(
         titulo: 'Buraco na calçada',
         descricao: 'Grande buraco próximo ao IC-3',
         localizacao: 'IC-3',
         autor: 'Testador',
+        categoria: Categoria.infraestrutura,
+        fotoUrl: 'https://example.com/foto.jpg',
+        latitude: -22.8123,
+        longitude: -47.0654,
       );
 
       await service.enviarDenuncia(denuncia);
@@ -61,8 +65,75 @@ void main() {
       final resultado = await service.obtenerDenuncias();
       expect(resultado.length, equals(1));
       expect(resultado.first.titulo, equals('Buraco na calçada'));
+      expect(resultado.first.descricao, equals('Grande buraco próximo ao IC-3'));
       expect(resultado.first.localizacao, equals('IC-3'));
       expect(resultado.first.autor, equals('Testador'));
+      expect(resultado.first.categoria, equals(Categoria.infraestrutura));
+      expect(resultado.first.fotoUrl, equals('https://example.com/foto.jpg'));
+      expect(resultado.first.latitude, closeTo(-22.8123, 0.0001));
+      expect(resultado.first.longitude, closeTo(-47.0654, 0.0001));
+    });
+
+    test('enviarDenuncia lanca erro quando apenas latitude e fornecida', () async {
+      final denuncia = Denuncia(
+        titulo: 'Buraco na calçada',
+        descricao: 'Grande buraco próximo ao IC-3',
+        localizacao: 'IC-3',
+        autor: 'Testador',
+        latitude: -22.8123,
+      );
+
+      expect(
+        () => service.enviarDenuncia(denuncia),
+        throwsArgumentError,
+      );
+    });
+
+    test('enviarDenuncia lanca erro quando apenas longitude e fornecida', () async {
+      final denuncia = Denuncia(
+        titulo: 'Buraco na calçada',
+        descricao: 'Grande buraco próximo ao IC-3',
+        localizacao: 'IC-3',
+        autor: 'Testador',
+        longitude: -47.0654,
+      );
+
+      expect(
+        () => service.enviarDenuncia(denuncia),
+        throwsArgumentError,
+      );
+    });
+
+    test('enviarDenuncia lanca erro com latitude fora do limite', () async {
+      final denuncia = Denuncia(
+        titulo: 'Buraco na calçada',
+        descricao: 'Grande buraco próximo ao IC-3',
+        localizacao: 'IC-3',
+        autor: 'Testador',
+        latitude: 95.0,
+        longitude: -47.0654,
+      );
+
+      expect(
+        () => service.enviarDenuncia(denuncia),
+        throwsArgumentError,
+      );
+    });
+
+    test('enviarDenuncia lanca erro com longitude fora do limite', () async {
+      final denuncia = Denuncia(
+        titulo: 'Buraco na calçada',
+        descricao: 'Grande buraco próximo ao IC-3',
+        localizacao: 'IC-3',
+        autor: 'Testador',
+        latitude: -22.8123,
+        longitude: 185.0,
+      );
+
+      expect(
+        () => service.enviarDenuncia(denuncia),
+        throwsArgumentError,
+      );
     });
 
     test('obtenerDenuncias retorna todas as denúncias inseridas', () async {
