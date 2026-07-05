@@ -15,7 +15,11 @@ void main() {
   Widget buildCard(Denuncia denuncia, {String tempo = 'há 5min'}) {
     return MaterialApp(
       home: Scaffold(
-        body: DenunciaCard(denuncia: denuncia, tempoRelativo: tempo, onApoiar: () {}),
+        // No feed real o card vive dentro de uma lista rolável; espelhamos isso
+        // aqui para evitar overflow no viewport fixo do teste.
+        body: SingleChildScrollView(
+          child: DenunciaCard(denuncia: denuncia, tempoRelativo: tempo, onApoiar: () {}),
+        ),
       ),
     );
   }
@@ -68,16 +72,17 @@ void main() {
     expect(find.text('Segurança'), findsOneWidget);
   });
 
-  testWidgets('exibe o badge de coordenadas GPS quando fornecidas', (tester) async {
-    final denunciaComGps = Denuncia(
-      titulo: 'Buraco',
-      descricao: 'Descrição',
-      localizacao: 'IC-3',
-      latitude: -22.81234,
-      longitude: -47.06543,
-    );
-    await tester.pumpWidget(buildCard(denunciaComGps));
-    expect(find.text('Lat: -22.81234, Lon: -47.06543'), findsOneWidget);
+  testWidgets('localização é tocável e abre o menu de mapas', (tester) async {
+    await tester.pumpWidget(buildCard(denunciaBase));
+
+    // Dica indicando que a localização é tocável
+    expect(find.text('Toque para abrir no mapa'), findsOneWidget);
+
+    // Ao tocar na localização, abre o menu com Google Maps e Apple Maps
+    await tester.tap(find.text('IC-3'));
+    await tester.pumpAndSettle();
+    expect(find.text('Google Maps'), findsOneWidget);
+    expect(find.text('Apple Maps'), findsOneWidget);
   });
 
   testWidgets('exibe a imagem quando fotoUrl é fornecida', (tester) async {
