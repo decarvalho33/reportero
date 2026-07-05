@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../models/denuncia.dart';
 
 class DenunciaCard extends StatelessWidget {
@@ -66,19 +67,48 @@ class DenunciaCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
 
-            // Localização textual
-            Row(
-              children: [
-                Icon(Icons.location_on_outlined, size: 14, color: Colors.blueGrey[400]),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    denuncia.localizacao,
-                    style: TextStyle(fontSize: 13, color: Colors.blueGrey[600]),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+            // Localização: indicador tocável que abre o mapa
+            InkWell(
+              onTap: () => _mostrarOpcoesMapa(context),
+              borderRadius: BorderRadius.circular(6),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.location_on, size: 16, color: Colors.blueGrey[500]),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            denuncia.localizacao,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.blueGrey[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(Icons.open_in_new, size: 13, color: Colors.blueGrey[400]),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 20, top: 1),
+                      child: Text(
+                        'Toque para abrir no mapa',
+                        style: TextStyle(
+                          fontSize: 10.5,
+                          color: Colors.blueGrey[400],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
 
             const SizedBox(height: 6),
@@ -89,26 +119,6 @@ class DenunciaCard extends StatelessWidget {
               runSpacing: 4,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                if (denuncia.latitude != null && denuncia.longitude != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: Colors.green[50],
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.explore_outlined, size: 12, color: Colors.green[600]),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Lat: ${denuncia.latitude!.toStringAsFixed(5)}, Lon: ${denuncia.longitude!.toStringAsFixed(5)}',
-                          style: TextStyle(fontSize: 11, color: Colors.green[700], fontWeight: FontWeight.w500),
-                        ),
-                      ],
-                    ),
-                  ),
-
                 Tooltip(
                   message: denuncia.categoria.descricao,
                   waitDuration: Duration.zero,
@@ -199,5 +209,81 @@ class DenunciaCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Consulta usada no mapa: coordenadas se existirem, senão o texto da localização.
+  String get _consultaMapa {
+    if (denuncia.latitude != null && denuncia.longitude != null) {
+      return '${denuncia.latitude},${denuncia.longitude}';
+    }
+    return denuncia.localizacao;
+  }
+
+  Uri get _googleMapsUri => Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(_consultaMapa)}',
+      );
+
+  Uri get _appleMapsUri {
+    if (denuncia.latitude != null && denuncia.longitude != null) {
+      return Uri.parse(
+        'https://maps.apple.com/?ll=${denuncia.latitude},${denuncia.longitude}'
+        '&q=${Uri.encodeComponent(denuncia.titulo)}',
+      );
+    }
+    return Uri.parse(
+      'https://maps.apple.com/?q=${Uri.encodeComponent(denuncia.localizacao)}',
+    );
+  }
+
+  /// Menu inferior com as opções de aplicativo de mapa.
+  void _mostrarOpcoesMapa(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.location_on, color: Colors.blueGrey[600]),
+                title: const Text('Abrir localização em'),
+                subtitle: Text(
+                  denuncia.localizacao,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const Divider(height: 1),
+              ListTile(
+                leading: const Icon(Icons.map, color: Color(0xFF2E7D32)),
+                title: const Text('Google Maps'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _abrirMapa(context, _googleMapsUri);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.map_outlined, color: Color(0xFF37474F)),
+                title: const Text('Apple Maps'),
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  _abrirMapa(context, _appleMapsUri);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Lança a URL do mapa em app externo; avisa se não for possível abrir.
+  Future<void> _abrirMapa(BuildContext context, Uri uri) async {
+    final aberto = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!aberto && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Não foi possível abrir o mapa.')),
+      );
+    }
   }
 }
