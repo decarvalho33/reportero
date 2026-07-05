@@ -67,4 +67,33 @@ void main() {
     await tester.pumpWidget(buildCard(denunciaComCategoria));
     expect(find.text('Segurança'), findsOneWidget);
   });
+
+  testWidgets('exibe o badge de coordenadas GPS quando fornecidas', (tester) async {
+    final denunciaComGps = Denuncia(
+      titulo: 'Buraco',
+      descricao: 'Descrição',
+      localizacao: 'IC-3',
+      latitude: -22.81234,
+      longitude: -47.06543,
+    );
+    await tester.pumpWidget(buildCard(denunciaComGps));
+    expect(find.text('Lat: -22.81234, Lon: -47.06543'), findsOneWidget);
+  });
+
+  testWidgets('exibe a imagem quando fotoUrl é fornecida', (tester) async {
+    final denunciaComFoto = Denuncia(
+      titulo: 'Buraco',
+      descricao: 'Descrição',
+      localizacao: 'IC-3',
+      fotoUrl: 'https://example.com/foto.jpg',
+    );
+    await tester.pumpWidget(buildCard(denunciaComFoto));
+    
+    final imageFinder = find.byType(Image);
+    expect(imageFinder, findsOneWidget);
+    
+    final imageWidget = tester.widget<Image>(imageFinder);
+    expect(imageWidget.image, isA<NetworkImage>());
+    expect((imageWidget.image as NetworkImage).url, equals('https://example.com/foto.jpg'));
+  });
 }

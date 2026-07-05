@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:app/models/denuncia.dart';
 import 'package:app/viewmodels/denuncia_viewmodel.dart';
@@ -50,6 +51,21 @@ void main() {
 
       expect(viewModel.categoriaSelecionada, equals(Categoria.outros));
     });
+
+    test('reseta foto e coordenadas GPS', () {
+      viewModel.definirFoto(Uint8List.fromList([1, 2, 3]), 'imagem.png');
+      viewModel.alternarLocalizacaoGps(true);
+
+      expect(viewModel.fotoBytes, isNotNull);
+      expect(viewModel.latitude, isNotNull);
+      expect(viewModel.longitude, isNotNull);
+
+      viewModel.limpar();
+
+      expect(viewModel.fotoBytes, isNull);
+      expect(viewModel.latitude, isNull);
+      expect(viewModel.longitude, isNull);
+    });
   });
 
   group('categoria', () {
@@ -69,6 +85,36 @@ void main() {
       viewModel.definirCategoria(Categoria.servicos);
 
       expect(notificou, isTrue);
+    });
+  });
+
+  group('foto', () {
+    test('definirFoto atualiza fotoBytes e notifica listeners', () {
+      var notificou = false;
+      viewModel.addListener(() => notificou = true);
+
+      final bytes = Uint8List.fromList([4, 5, 6]);
+      viewModel.definirFoto(bytes, 'teste.jpg');
+
+      expect(viewModel.fotoBytes, equals(bytes));
+      expect(notificou, isTrue);
+    });
+  });
+
+  group('gps', () {
+    test('alternarLocalizacaoGps ativa e desativa coordenadas', () {
+      var notificou = 0;
+      viewModel.addListener(() => notificou++);
+
+      viewModel.alternarLocalizacaoGps(true);
+      expect(viewModel.latitude, equals(-22.8184));
+      expect(viewModel.longitude, equals(-47.0647));
+
+      viewModel.alternarLocalizacaoGps(false);
+      expect(viewModel.latitude, isNull);
+      expect(viewModel.longitude, isNull);
+
+      expect(notificou, equals(2));
     });
   });
 }
