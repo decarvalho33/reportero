@@ -33,17 +33,6 @@ class FeedViewModel extends ChangeNotifier {
 
     try {
       _allDenuncias = await _service.obtenerDenuncias();
-      _allDenuncias.insert(0, Denuncia(
-        id: "teste_mock_axel",
-        titulo: "Lâmpada Quebrada na Unicamp",
-        descricao: "A lâmpada perto do bandejão está piscando faz duas semanas. Perigoso andar por aqui à noite.",
-        localizacao: "Perto do Restaurante Universitário",
-        autor: "Axel (Teste Frontend)",
-        latitude: -22.8184,
-        longitude: -47.0647,
-        fotoUrl: "https://picsum.photos/400/200",
-        createdAt: DateTime.now(),
-      ));
       _aplicarFiltrosEOrdenacao();
     } catch (e) {
       _erro = "Erro ao carregar denúncias";
