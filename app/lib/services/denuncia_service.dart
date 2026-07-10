@@ -113,4 +113,33 @@ class DenunciaService {
         .map((linha) => linha['denuncia_id'] as String)
         .toSet();
   }
+
+  // ==========================================
+  // FUNÇÕES ADMINISTRATIVAS (MOCK ÉPICO 6)
+  // Sem validação de JWT por enquanto (Álvaro fará o RLS no Épico 4)
+  // ==========================================
+
+  /// (US 6.4) Atualiza o status de uma denúncia.
+  Future<void> atualizarStatus(String denunciaId, StatusDenuncia novoStatus) async {
+    await _supabase
+        .from('denuncias')
+        .update({'status': novoStatus.label})
+        .eq('id', denunciaId);
+  }
+
+  /// (US 6.6) Atribui um setor responsável para cuidar da denúncia.
+  Future<void> atribuirSetor(String denunciaId, String setor) async {
+    await _supabase
+        .from('denuncias')
+        .update({'setor_responsavel': setor})
+        .eq('id', denunciaId);
+  }
+
+  /// (US 6.5) Salva uma resposta oficial da Unicamp para o usuário.
+  Future<void> responderDenuncia(String denunciaId, String resposta) async {
+    await _supabase
+        .from('denuncias')
+        .update({'resposta_admin': resposta})
+        .eq('id', denunciaId);
+  }
 }
