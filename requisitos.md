@@ -186,3 +186,32 @@ Como universitário, quero ordenar o feed de denúncias pela quantidade de apoio
 
 **História 3.4**
 Como universitário, quero remover meu apoio de uma denúncia, caso tenha cometido um erro ao clicar ou tenha mudado de opinião.
+
+---
+
+### 2.4 Épico 4 — Autenticação institucional
+
+Cobre o cadastro, acesso e gestão de sessão dos usuários por meio
+de e-mail institucional da Unicamp. É um épico-base: os Épicos 5 e
+6 dependem dele.
+
+- **US 4.1 — Cadastro com e-mail institucional**
+  Como membro da comunidade Unicamp, quero me cadastrar usando meu
+  e-mail institucional, para garantir que apenas pessoas da
+  universidade acessem a plataforma.
+
+- **US 4.2 — Verificação de e-mail**
+  Como novo usuário, quero confirmar minha conta por um link enviado
+  ao meu e-mail, para validar que o endereço informado é realmente meu.
+
+- **US 4.3 — Login com e-mail e senha**
+  Como usuário cadastrado, quero entrar na plataforma com meu e-mail
+  e senha, para acessar minhas funcionalidades pessoais.
+
+- **US 4.4 — Recuperação de senha**
+  Como usuário que esqueceu a senha, quero solicitar a redefinição da
+  senha por e-mail, para recuperar o acesso à minha conta.
+
+- **US 4.5 — Logout**
+  Como usuário autenticado, quero encerrar minha sessão, para proteger
+  minha conta em dispositivos compartilhados.
