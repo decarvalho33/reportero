@@ -215,3 +215,34 @@ de e-mail institucional da Unicamp. É um épico-base: os Épicos 5 e
 - **US 4.5 — Logout**
   Como usuário autenticado, quero encerrar minha sessão, para proteger
   minha conta em dispositivos compartilhados.
+
+---
+
+### 2.5 Épico 5 — Perfil do usuário e minhas denúncias
+
+Cobre a área pessoal do usuário autenticado. Depende do Épico 4.
+
+- **US 5.1 — Visualizar perfil**
+  Como usuário autenticado, quero visualizar meu perfil, para conferir
+  os dados que tenho cadastrados na plataforma.
+
+- **US 5.2 — Editar dados do perfil**
+  Como usuário autenticado, quero editar meus dados de perfil, para
+  manter minhas informações atualizadas.
+
+- **US 5.3 — Listar minhas denúncias**
+  Como usuário autenticado, quero ver a lista das denúncias que eu
+  registrei, para acompanhar o que já reportei na plataforma.
+
+- **US 5.4 — Filtrar e buscar minhas denúncias**
+  Como usuário autenticado, quero filtrar e buscar entre as minhas
+  denúncias, para encontrar rapidamente um registro específico.
+
+- **US 5.5 — Receber notificação de atualização de status**
+  Como autor de uma denúncia, quero ser notificado quando o status
+  dela mudar, para acompanhar a resolução sem precisar verificar
+  manualmente.
+
+- **US 5.6 — Editar ou excluir uma denúncia própria**
+  Como autor de uma denúncia, quero editar ou excluir um registro meu,
+  para corrigir informações erradas ou remover algo enviado por engano.
