@@ -246,3 +246,46 @@ Cobre a área pessoal do usuário autenticado. Depende do Épico 4.
 - **US 5.6 — Editar ou excluir uma denúncia própria**
   Como autor de uma denúncia, quero editar ou excluir um registro meu,
   para corrigir informações erradas ou remover algo enviado por engano.
+
+---
+
+### 2.6 Épico 6 — Interface administrativa para a Unicamp
+
+Cobre a área restrita destinada à administração da universidade.
+Depende do Épico 4.
+
+- **US 6.1 — Acesso restrito de administrador**
+  Como administrador da Unicamp, quero acessar uma área restrita com
+  credenciais próprias, para gerenciar as denúncias com segurança.
+
+- **US 6.2 — Painel geral de denúncias**
+  Como administrador, quero ver um painel geral com as denúncias
+  registradas, para ter uma visão consolidada dos problemas do campus.
+
+- **US 6.3 — Detalhar denúncia (visão admin)**
+  Como administrador, quero abrir os detalhes completos de uma denúncia,
+  para compreender integralmente a ocorrência antes de agir.
+
+- **US 6.4 — Atualizar status da denúncia**
+  Como administrador, quero atualizar o status de uma denúncia, para
+  informar a comunidade sobre o andamento da resolução.
+
+- **US 6.5 — Responder ao autor da denúncia**
+  Como administrador, quero comentar ou responder ao autor de uma
+  denúncia, para dar retorno sobre o tratamento do problema.
+
+- **US 6.6 — Atribuir denúncia a setor/responsável**
+  Como administrador, quero atribuir uma denúncia a um setor ou
+  responsável, para direcionar o problema a quem pode resolvê-lo.
+
+- **US 6.7 — Filtrar e buscar denúncias (admin)**
+  Como administrador, quero filtrar e buscar denúncias, para localizar
+  ocorrências específicas em meio ao volume total.
+
+- **US 6.8 — Exportar relatório de denúncias**
+  Como administrador, quero exportar um relatório das denúncias, para
+  realizar análises e prestação de contas fora da plataforma.
+
+- **US 6.9 — Gerenciar administradores**
+  Como administrador com permissão de gestão, quero gerenciar outros
+  administradores, para controlar quem tem acesso à área restrita.
