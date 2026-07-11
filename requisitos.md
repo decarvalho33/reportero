@@ -2,7 +2,7 @@
 
 ## 1. Técnicas de Elicitação
 
-### 1.1 Brainstorming
+### 1.1 Brainstorming 1
 
 #### Execução
 
@@ -126,6 +126,70 @@ As entrevistas convergem em torno de alguns temas centrais:
 - **RNF02 — Usabilidade e baixa fricção.** As ações principais (denunciar, apoiar, comentar) devem exigir o mínimo de passos possível.
 - **RNF03 — Escalabilidade multi-instituição.** A arquitetura deve permitir o atendimento a múltiplas universidades/campi (ex.: UNICAMP e USP).
 - **RNF04 — Confiabilidade do sinal coletivo.** Os mecanismos de engajamento (feed, upvotes) devem refletir de forma fidedigna a relevância e a recorrência dos problemas.
+
+### 1.3 Brainstorming 2
+
+#### Execução
+
+**Data:** 09 de julho de 2026, às 19h00  
+**Formato:** Reunião remota via Google Meet  
+**Participantes:** Álvaro, Axel, Gabriel, Gilberto e João
+
+A sessão teve como objetivo planejar a entrega 3, definindo
+quais funcionalidades novas deveriam ser incorporadas ao
+Reportero Unicamp — já relativamente completo do ponto de
+vista do usuário final — e organizando a divisão de tarefas
+entre os membros do grupo.
+
+#### Ideias geradas
+
+O grupo já sabia, de antemão, que seria necessária uma
+funcionalidade de **login**: trazer responsabilização para
+os usuários, mantendo a possibilidade de denúncia anônima,
+como forma de coibir o mau uso da plataforma por usuários
+mal-intencionados (flooding, boicote a denúncias de
+terceiros, etc.).
+
+Em seguida, levantou-se a ideia de trazer uma segunda
+interface para o aplicativo, representando o lado do
+**administrador**. Entendeu-se que essa seria uma forma
+vantajosa de agregar novas funcionalidades a um app já
+relativamente completo do ponto de vista do usuário final.
+A partir disso, arquitetou-se o conjunto de funcionalidades
+que deveria compor a visão do administrador (vide Épico 6).
+
+Por fim, o grupo optou por incluir uma terceira feature,
+para trazer margem de segurança para a avaliação da entrega:
+um **painel do usuário** com o histórico de denúncias
+registradas, com funcionalidades de edição e de notificação
+de atualização de status sobre as denúncias realizadas
+(vide Épico 5).
+
+#### Resultado
+
+A sessão convergiu em três novos épicos:
+
+- **Épico 4 — Autenticação institucional:** login com e-mail
+  institucional da Unicamp, trazendo responsabilização ao
+  usuário sem eliminar a possibilidade de denúncia anônima.
+- **Épico 5 — Perfil do usuário e minhas denúncias:** painel
+  pessoal com histórico, edição e notificações de status das
+  denúncias do próprio usuário.
+- **Épico 6 — Interface administrativa para a Unicamp:** área
+  restrita para gestão, triagem e resposta às denúncias por
+  parte da administração.
+
+Além disso, foi discutida a divisão de tarefas e as demais
+demandas da entrega 3:
+
+1. Elaborar os épicos e histórias de usuário.
+2. Refatoração do código existente.
+3. Preparar a apresentação/demonstração.
+4. Reforçar os testes automatizados.
+5. Atualizar o processo.
+
+Com as tarefas atribuídas aos membros do grupo, a sessão
+foi dada por encerrada.
 
 ## 2. Épicos e Histórias de Usuário
 
