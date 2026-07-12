@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/denuncia.dart';
 import '../viewmodels/feed_viewmodel.dart';
+import '../viewmodels/auth_viewmodel.dart';
 import 'widgets/denuncia_card.dart';
 
 class FeedScreen extends StatefulWidget {
@@ -12,6 +13,17 @@ class FeedScreen extends StatefulWidget {
 
 class _FeedScreenState extends State<FeedScreen> {
   final _viewModel = FeedViewModel();
+  final _authViewModel = AuthViewModel();
+
+  /// Verifica se o usuário está logado. Se estiver, redireciona para a rota desejada.
+  /// Se não estiver, envia para a tela de login.
+  void _redirecionarParaAutenticados(String rota) {
+    if (!_authViewModel.estaLogado) {
+      Navigator.pushNamed(context, '/login');
+    } else {
+      Navigator.pushNamed(context, rota);
+    }
+  }
 
   @override
   void initState() {
@@ -38,6 +50,43 @@ class _FeedScreenState extends State<FeedScreen> {
             pinned: true,
             backgroundColor: const Color(0xFF37474F),
             actions: [
+              StreamBuilder(
+                stream: _authViewModel.mudancasDeSessao,
+                builder: (context, snapshot) {
+                  final logado = _authViewModel.estaLogado;
+                  return TextButton.icon(
+                    onPressed: () {
+                      if (!logado) {
+                        Navigator.pushNamed(context, '/login');
+                      } else {
+                        /// Deixado pronto para quando a tela de perfil existir
+                        /// _redirecionarParaAutenticados('/perfil');
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Tela de perfil em breve (Outro colega)',
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    icon: Icon(
+                      logado ? Icons.account_circle : Icons.login,
+                      color: Colors.white,
+                    ),
+                    label: Text(
+                      logado
+                          ? (_authViewModel.nomeUsuario?.split(' ').first ??
+                                'Perfil')
+                          : 'Entrar',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+                },
+              ),
               PopupMenuButton<TipoOrdenacao>(
                 icon: const Icon(Icons.sort, color: Colors.white),
                 onSelected: _viewModel.alternarOrdenacao,
@@ -61,11 +110,15 @@ class _FeedScreenState extends State<FeedScreen> {
                 tooltip: 'Nova Denúncia',
                 onPressed: () => Navigator.pushNamed(context, '/nova'),
               ),
+              const SizedBox(width: 8),
             ],
             flexibleSpace: FlexibleSpaceBar(
               title: const Text(
                 'Reportero Unicamp',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               background: Image.asset(
                 'assets/header.jpg',
@@ -88,7 +141,9 @@ class _FeedScreenState extends State<FeedScreen> {
                 child: Row(
                   children: [
                     _buildCategoriaChip('Todas', null),
-                    ...Categoria.values.map((c) => _buildCategoriaChip(c.label, c)),
+                    ...Categoria.values.map(
+                      (c) => _buildCategoriaChip(c.label, c),
+                    ),
                   ],
                 ),
               ),
@@ -105,9 +160,16 @@ class _FeedScreenState extends State<FeedScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, color: Colors.grey[400], size: 48),
+                    Icon(
+                      Icons.error_outline,
+                      color: Colors.grey[400],
+                      size: 48,
+                    ),
                     const SizedBox(height: 12),
-                    Text(_viewModel.erro!, style: TextStyle(color: Colors.grey[600])),
+                    Text(
+                      _viewModel.erro!,
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: _viewModel.carregarDenuncias,
@@ -123,7 +185,11 @@ class _FeedScreenState extends State<FeedScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.inbox_outlined, color: Colors.grey[400], size: 48),
+                    Icon(
+                      Icons.inbox_outlined,
+                      color: Colors.grey[400],
+                      size: 48,
+                    ),
                     const SizedBox(height: 12),
                     Text(
                       _viewModel.filtroCategoria != null
@@ -137,17 +203,14 @@ class _FeedScreenState extends State<FeedScreen> {
             )
           else
             SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final denuncia = _viewModel.denuncias[index];
-                  return DenunciaCard(
-                    denuncia: denuncia,
-                    tempoRelativo: _viewModel.formatarTempo(denuncia.createdAt),
-                    onApoiar: () => _viewModel.alternarApoio(denuncia),
-                  );
-                },
-                childCount: _viewModel.denuncias.length,
-              ),
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final denuncia = _viewModel.denuncias[index];
+                return DenunciaCard(
+                  denuncia: denuncia,
+                  tempoRelativo: _viewModel.formatarTempo(denuncia.createdAt),
+                  onApoiar: () => _viewModel.alternarApoio(denuncia),
+                );
+              }, childCount: _viewModel.denuncias.length),
             ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 80)),
@@ -171,7 +234,8 @@ class _FeedScreenState extends State<FeedScreen> {
       child: ChoiceChip(
         label: Text(label),
         selected: selecionado,
-        onSelected: (_) => _viewModel.filtrarPorCategoria(selecionado ? null : categoria),
+        onSelected: (_) =>
+            _viewModel.filtrarPorCategoria(selecionado ? null : categoria),
         selectedColor: const Color(0xFF37474F),
         backgroundColor: Colors.white,
         side: BorderSide(color: Colors.blueGrey[200]!),
