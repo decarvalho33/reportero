@@ -69,7 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Column(
           children: [
             Container(
-              height: 280,
               width: double.infinity,
               decoration: const BoxDecoration(
                 image: DecorationImage(
@@ -82,8 +81,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               child: const SafeArea(
+                bottom: false,
                 child: Padding(
-                  padding: EdgeInsets.all(32.0),
+                  padding: EdgeInsets.only(top: 100.0, bottom: 40.0, left: 32.0, right: 32.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.end,
