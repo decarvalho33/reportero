@@ -14,6 +14,8 @@ class FeedScreen extends StatefulWidget {
 class _FeedScreenState extends State<FeedScreen> {
   final _viewModel = FeedViewModel();
   final _authViewModel = AuthViewModel();
+  final _scrollController = ScrollController();
+  bool _isScrolled = false;
 
   /// Verifica se o usuário está logado. Se estiver, redireciona para a rota desejada.
   /// Se não estiver, envia para a tela de login.
@@ -30,10 +32,17 @@ class _FeedScreenState extends State<FeedScreen> {
     super.initState();
     _viewModel.addListener(() => setState(() {}));
     _viewModel.carregarDenuncias();
+    _scrollController.addListener(() {
+      final isScrolled = _scrollController.offset > 80;
+      if (_isScrolled != isScrolled) {
+        setState(() => _isScrolled = isScrolled);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _viewModel.dispose();
     super.dispose();
   }
@@ -43,6 +52,7 @@ class _FeedScreenState extends State<FeedScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: CustomScrollView(
+        controller: _scrollController,
         slivers: [
           SliverAppBar(
             expandedHeight: 200.0,
@@ -54,38 +64,117 @@ class _FeedScreenState extends State<FeedScreen> {
                 stream: _authViewModel.mudancasDeSessao,
                 builder: (context, snapshot) {
                   final logado = _authViewModel.estaLogado;
-                  return TextButton.icon(
-                    onPressed: () {
-                      if (!logado) {
-                        Navigator.pushNamed(context, '/login');
-                      } else {
-                        /// Deixado pronto para quando a tela de perfil existir
-                        /// _redirecionarParaAutenticados('/perfil');
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Tela de perfil')),
-                        );
-                      }
-                    },
-                    icon: Icon(
-                      logado ? Icons.account_circle : Icons.login,
-                      color: Colors.white,
-                    ),
-                    label: Text(
-                      logado
-                          ? (_authViewModel.nomeUsuario?.split(' ').first ??
-                                'Perfil')
-                          : 'Entrar',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _isScrolled
+                          ? IconButton(
+                              onPressed: () {
+                                if (!logado) {
+                                  Navigator.pushNamed(context, '/login');
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Tela de perfil'),
+                                    ),
+                                  );
+                                }
+                              },
+                              tooltip: logado ? 'Perfil' : 'Entrar',
+                              visualDensity: VisualDensity.compact,
+                              icon: Icon(
+                                logado ? Icons.account_circle : Icons.login,
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                            )
+                          : TextButton.icon(
+                              onPressed: () {
+                                if (!logado) {
+                                  Navigator.pushNamed(context, '/login');
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Tela de perfil'),
+                                    ),
+                                  );
+                                }
+                              },
+                              style: TextButton.styleFrom(
+                                visualDensity: VisualDensity.compact,
+                              ),
+                              icon: Icon(
+                                logado ? Icons.account_circle : Icons.login,
+                                color: Colors.white,
+                              ),
+                              label: Text(
+                                logado
+                                    ? (_authViewModel.nomeUsuario
+                                              ?.split(' ')
+                                              .first ??
+                                          'Perfil')
+                                    : 'Entrar',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                      if (logado)
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          icon: const Icon(Icons.logout, color: Colors.white),
+                          tooltip: 'Sair',
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Sair da conta'),
+                                content: const Text(
+                                  'Tem certeza que deseja sair do aplicativo?',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: Colors.grey[700],
+                                    ),
+                                    child: const Text('Cancelar'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.pop(context);
+                                      await _authViewModel.sair();
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Você saiu da sua conta',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: Colors.red,
+                                    ),
+                                    child: const Text('Sair'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                    ],
                   );
                 },
               ),
               PopupMenuButton<TipoOrdenacao>(
                 icon: const Icon(Icons.sort, color: Colors.white),
                 onSelected: _viewModel.alternarOrdenacao,
+                padding: EdgeInsets.zero,
                 itemBuilder: (context) => const [
                   PopupMenuItem(
                     value: TipoOrdenacao.recente,
@@ -102,18 +191,30 @@ class _FeedScreenState extends State<FeedScreen> {
                 ],
               ),
               IconButton(
+                visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.add_circle_outline, color: Colors.white),
                 tooltip: 'Nova Denúncia',
                 onPressed: () => Navigator.pushNamed(context, '/nova'),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
             ],
             flexibleSpace: FlexibleSpaceBar(
+              centerTitle: false,
+              titlePadding: EdgeInsets.only(
+                left: 16,
+                bottom: 16,
+                right: _isScrolled
+                    ? (_authViewModel.estaLogado ? 190 : 140)
+                    : 16,
+              ),
               title: const Text(
                 'Reportero Unicamp',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
+                  fontSize: 20,
                 ),
               ),
               background: Image.asset(
