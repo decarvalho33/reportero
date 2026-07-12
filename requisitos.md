@@ -2,7 +2,7 @@
 
 ## 1. Técnicas de Elicitação
 
-### 1.1 Brainstorming
+### 1.1 Brainstorming 1
 
 #### Execução
 
@@ -127,62 +127,229 @@ As entrevistas convergem em torno de alguns temas centrais:
 - **RNF03 — Escalabilidade multi-instituição.** A arquitetura deve permitir o atendimento a múltiplas universidades/campi (ex.: UNICAMP e USP).
 - **RNF04 — Confiabilidade do sinal coletivo.** Os mecanismos de engajamento (feed, upvotes) devem refletir de forma fidedigna a relevância e a recorrência dos problemas.
 
+### 1.3 Brainstorming 2
+
+#### Execução
+
+**Data:** 09 de julho de 2026, às 19h00  
+**Formato:** Reunião remota via Google Meet  
+**Participantes:** Álvaro, Axel, Gabriel, Gilberto e João
+
+A sessão teve como objetivo planejar a entrega 3, definindo
+quais funcionalidades novas deveriam ser incorporadas ao
+Reportero Unicamp — já relativamente completo do ponto de
+vista do usuário final — e organizando a divisão de tarefas
+entre os membros do grupo.
+
+#### Ideias geradas
+
+O grupo já sabia, de antemão, que seria necessária uma
+funcionalidade de **login**: trazer responsabilização para
+os usuários, mantendo a possibilidade de denúncia anônima,
+como forma de coibir o mau uso da plataforma por usuários
+mal-intencionados (flooding, boicote a denúncias de
+terceiros, etc.).
+
+Em seguida, levantou-se a ideia de trazer uma segunda
+interface para o aplicativo, representando o lado do
+**administrador**. Entendeu-se que essa seria uma forma
+vantajosa de agregar novas funcionalidades a um app já
+relativamente completo do ponto de vista do usuário final.
+A partir disso, arquitetou-se o conjunto de funcionalidades
+que deveria compor a visão do administrador (vide Épico 6).
+
+Por fim, o grupo optou por incluir uma terceira feature,
+para trazer margem de segurança para a avaliação da entrega:
+um **painel do usuário** com o histórico de denúncias
+registradas, com funcionalidades de edição e de notificação
+de atualização de status sobre as denúncias realizadas
+(vide Épico 5).
+
+#### Resultado
+
+A sessão convergiu em três novos épicos:
+
+- **Épico 4 — Autenticação institucional:** login com e-mail
+  institucional da Unicamp, trazendo responsabilização ao
+  usuário sem eliminar a possibilidade de denúncia anônima.
+- **Épico 5 — Perfil do usuário e minhas denúncias:** painel
+  pessoal com histórico, edição e notificações de status das
+  denúncias do próprio usuário.
+- **Épico 6 — Interface administrativa para a Unicamp:** área
+  restrita para gestão, triagem e resposta às denúncias por
+  parte da administração.
+
+Além disso, foi discutida a divisão de tarefas e as demais
+demandas da entrega 3:
+
+1. Elaborar os épicos e histórias de usuário.
+2. Refatoração do código existente.
+3. Preparar a apresentação/demonstração.
+4. Reforçar os testes automatizados.
+5. Atualizar o processo.
+
+Com as tarefas atribuídas aos membros do grupo, a sessão
+foi dada por encerrada.
+
 ## 2. Épicos e Histórias de Usuário
 
 ### 2.1 Épico 1 — Criação e Registro de Denúncias
 
-**Descrição:** Permitir que os universitários registrem denúncias sobre problemas no campus de forma rápida, em poucos cliques, garantindo agilidade e organização.
+Permitir que os universitários registrem denúncias sobre problemas no campus de forma rápida, em poucos cliques, garantindo agilidade e organização.
 
-**História 1.1**
-Como universitário, quero preencher um formulário de denúncia simplificado e rápido, para registrar um problema encontrado no campus com o mínimo de cliques possível.
+- **US 1.1 — Preencher formulário de denúncia**:
+  Como universitário, quero preencher um formulário de denúncia simplificado e rápido, para registrar um problema encontrado no campus com o mínimo de cliques possível.
 
-**História 1.2**
-Como universitário, quero classificar o problema selecionando uma categoria (ex: infraestrutura, segurança, limpeza, etc.), para que a denúncia seja organizada e roteada corretamente.
+- **US 1.2 — Classificar denúncia por categoria**:
+  Como universitário, quero classificar o problema selecionando uma categoria (ex: infraestrutura, segurança, limpeza, etc.), para que a denúncia seja organizada e roteada corretamente.
 
-**História 1.3**
-Como universitário, quero informar a localização da ocorrência no mapa, para que o problema possa ser identificado e encontrado rapidamente.
+- **US 1.3 — Informar localização no mapa**:
+  Como universitário, quero informar a localização da ocorrência no mapa, para que o problema possa ser identificado e encontrado rapidamente.
 
-**História 1.4**
-Como universitário, quero adicionar uma breve descrição do incidente, para fornecer contexto adicional sobre a denúncia.
+- **US 1.4 — Adicionar descrição do incidente**:
+  Como universitário, quero adicionar uma breve descrição do incidente, para fornecer contexto adicional sobre a denúncia.
 
-**História 1.5**
-Como universitário, quero anexar uma foto do incidente de forma prática, para que outros estudantes e a administração visualizem a gravidade do problema.
+- **US 1.5 — Anexar foto do incidente**:
+  Como universitário, quero anexar uma foto do incidente de forma prática, para que outros estudantes e a administração visualizem a gravidade do problema.
 
-**História 1.6**
-Como universitário, quero ter a opção clara de registrar a denúncia de forma anônima (ou me identificar, se preferir), para relatar problemas sem fricção e sem medo de exposição.
+- **US 1.6 — Registrar denúncia anônima ou identificada**:
+  Como universitário, quero ter a opção clara de registrar a denúncia de forma anônima (ou me identificar, se preferir), para relatar problemas sem fricção e sem medo de exposição.
 
 ---
 
 ### 2.2 Épico 2 — Visualização e Consulta de Denúncias
 
-**Descrição:** Permitir que os universitários visualizem um feed de denúncias registradas na plataforma para acompanhar os problemas reportados pela comunidade acadêmica.
+Permitir que os universitários visualizem um feed de denúncias registradas na plataforma para acompanhar os problemas reportados pela comunidade acadêmica.
 
-**História 2.1**
-Como universitário, quero visualizar um feed com uma lista de denúncias, para conhecer e me engajar com os problemas reportados no campus.
+- **US 2.1 — Visualizar feed de denúncias**:
+  Como universitário, quero visualizar um feed com uma lista de denúncias, para conhecer e me engajar com os problemas reportados no campus.
 
-**História 2.2**
-Como universitário, quero visualizar o título, a categoria, a localização, o autor (ou indicação de anonimato) e a descrição de cada denúncia, para compreender melhor a ocorrência.
+- **US 2.2 — Visualizar detalhes da denúncia**:
+  Como universitário, quero visualizar o título, a categoria, a localização, o autor (ou indicação de anonimato) e a descrição de cada denúncia, para compreender melhor a ocorrência.
 
-**História 2.3**
-Como universitário, quero visualizar as denúncias ordenadas pelas mais recentes, para acompanhar os acontecimentos e problemas atuais da universidade.
+- **US 2.3 — Ordenar denúncias por mais recentes**:
+  Como universitário, quero visualizar as denúncias ordenadas pelas mais recentes, para acompanhar os acontecimentos e problemas atuais da universidade.
 
-**História 2.4**
-Como universitário, quero filtrar as denúncias por categoria, para facilitar a busca, consulta e análise das ocorrências que mais me interessam.
+- **US 2.4 — Filtrar denúncias por categoria**:
+  Como universitário, quero filtrar as denúncias por categoria, para facilitar a busca, consulta e análise das ocorrências que mais me interessam.
 
 ---
 
 ### 2.3 Épico 3 — Priorização Comunitária de Denúncias e Engajamento
 
-**Descrição:** Permitir que a comunidade acadêmica apoie denúncias para dar visibilidade e peso coletivo aos problemas mais relevantes.
+Permitir que a comunidade acadêmica apoie denúncias para dar visibilidade e peso coletivo aos problemas mais relevantes.
 
-**História 3.1**
-Como universitário, quero apoiar (dar "upvote") uma denúncia, para demonstrar que também fui afetado pelo problema e ajudar a dar peso coletivo àquela questão.
+- **US 3.1 — Apoiar (upvote) uma denúncia**:
+  Como universitário, quero apoiar (dar "upvote") uma denúncia, para demonstrar que também fui afetado pelo problema e ajudar a dar peso coletivo àquela questão.
 
-**História 3.2**
-Como universitário, quero visualizar a quantidade de apoios em uma denúncia, para identificar facilmente os problemas mais recorrentes e críticos do campus.
+- **US 3.2 — Visualizar quantidade de apoios**:
+  Como universitário, quero visualizar a quantidade de apoios em uma denúncia, para identificar facilmente os problemas mais recorrentes e críticos do campus.
 
-**História 3.3**
-Como universitário, quero ordenar o feed de denúncias pela quantidade de apoios, para visualizar as ocorrências consideradas mais relevantes pela comunidade.
+- **US 3.3 — Ordenar feed por quantidade de apoios**:
+  Como universitário, quero ordenar o feed de denúncias pela quantidade de apoios, para visualizar as ocorrências consideradas mais relevantes pela comunidade.
 
-**História 3.4**
-Como universitário, quero remover meu apoio de uma denúncia, caso tenha cometido um erro ao clicar ou tenha mudado de opinião.
+- **US 3.4 — Remover apoio de uma denúncia**:
+  Como universitário, quero remover meu apoio de uma denúncia, caso tenha cometido um erro ao clicar ou tenha mudado de opinião.
+
+---
+
+### 2.4 Épico 4 — Autenticação institucional
+
+Cobre o cadastro, acesso e gestão de sessão dos usuários por meio
+de e-mail institucional da Unicamp. É um épico-base: os Épicos 5 e
+6 dependem dele.
+
+- **US 4.1 — Cadastro com e-mail institucional**:
+  Como membro da comunidade Unicamp, quero me cadastrar usando meu
+  e-mail institucional, para garantir que apenas pessoas da
+  universidade acessem a plataforma.
+
+- **US 4.2 — Verificação de e-mail**:
+  Como novo usuário, quero confirmar minha conta por um link enviado
+  ao meu e-mail, para validar que o endereço informado é realmente meu.
+
+- **US 4.3 — Login com e-mail e senha**:
+  Como usuário cadastrado, quero entrar na plataforma com meu e-mail
+  e senha, para acessar minhas funcionalidades pessoais.
+
+- **US 4.4 — Recuperação de senha**:
+  Como usuário que esqueceu a senha, quero solicitar a redefinição da
+  senha por e-mail, para recuperar o acesso à minha conta.
+
+- **US 4.5 — Logout**:
+  Como usuário autenticado, quero encerrar minha sessão, para proteger
+  minha conta em dispositivos compartilhados.
+
+---
+
+### 2.5 Épico 5 — Perfil do usuário e minhas denúncias
+
+Cobre a área pessoal do usuário autenticado. Depende do Épico 4.
+
+- **US 5.1 — Visualizar perfil**:
+  Como usuário autenticado, quero visualizar meu perfil, para conferir
+  os dados que tenho cadastrados na plataforma.
+
+- **US 5.2 — Editar dados do perfil**:
+  Como usuário autenticado, quero editar meus dados de perfil, para
+  manter minhas informações atualizadas.
+
+- **US 5.3 — Listar minhas denúncias**:
+  Como usuário autenticado, quero ver a lista das denúncias que eu
+  registrei, para acompanhar o que já reportei na plataforma.
+
+- **US 5.4 — Filtrar e buscar minhas denúncias**:
+  Como usuário autenticado, quero filtrar e buscar entre as minhas
+  denúncias, para encontrar rapidamente um registro específico.
+
+- **US 5.5 — Receber notificação de atualização de status**:
+  Como autor de uma denúncia, quero ser notificado quando o status
+  dela mudar, para acompanhar a resolução sem precisar verificar
+  manualmente.
+
+- **US 5.6 — Editar ou excluir uma denúncia própria**:
+  Como autor de uma denúncia, quero editar ou excluir um registro meu,
+  para corrigir informações erradas ou remover algo enviado por engano.
+
+---
+
+### 2.6 Épico 6 — Interface administrativa para a Unicamp
+
+Cobre a área restrita destinada à administração da universidade.
+Depende do Épico 4.
+
+- **US 6.1 — Acesso restrito de administrador**:
+  Como administrador da Unicamp, quero acessar uma área restrita com
+  credenciais próprias, para gerenciar as denúncias com segurança.
+
+- **US 6.2 — Painel geral de denúncias**:
+  Como administrador, quero ver um painel geral com as denúncias
+  registradas, para ter uma visão consolidada dos problemas do campus.
+
+- **US 6.3 — Detalhar denúncia (visão admin)**:
+  Como administrador, quero abrir os detalhes completos de uma denúncia,
+  para compreender integralmente a ocorrência antes de agir.
+
+- **US 6.4 — Atualizar status da denúncia**:
+  Como administrador, quero atualizar o status de uma denúncia, para
+  informar a comunidade sobre o andamento da resolução.
+
+- **US 6.5 — Responder ao autor da denúncia**:
+  Como administrador, quero comentar ou responder ao autor de uma
+  denúncia, para dar retorno sobre o tratamento do problema.
+
+- **US 6.6 — Atribuir denúncia a setor/responsável**:
+  Como administrador, quero atribuir uma denúncia a um setor ou
+  responsável, para direcionar o problema a quem pode resolvê-lo.
+
+- **US 6.7 — Filtrar e buscar denúncias (admin)**:
+  Como administrador, quero filtrar e buscar denúncias, para localizar
+  ocorrências específicas em meio ao volume total.
+
+- **US 6.8 — Exportar relatório de denúncias**:
+  Como administrador, quero exportar um relatório das denúncias, para
+  realizar análises e prestação de contas fora da plataforma.
+
+- **US 6.9 — Gerenciar administradores**:
+  Como administrador com permissão de gestão, quero gerenciar outros
+  administradores, para controlar quem tem acesso à área restrita.
