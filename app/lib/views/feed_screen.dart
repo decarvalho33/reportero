@@ -62,11 +62,7 @@ class _FeedScreenState extends State<FeedScreen> {
                         /// Deixado pronto para quando a tela de perfil existir
                         /// _redirecionarParaAutenticados('/perfil');
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Tela de perfil em breve (Outro colega)',
-                            ),
-                          ),
+                          const SnackBar(content: Text('Tela de perfil')),
                         );
                       }
                     },
