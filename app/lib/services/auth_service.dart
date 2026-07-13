@@ -129,6 +129,18 @@ class AuthService {
     }
   }
 
+  /// Define a nova senha após o usuário clicar no link de recuperação (Deep Link).
+  Future<void> atualizarSenha(String novaSenha) async {
+    if (!senhaValida(novaSenha)) {
+      throw ArgumentError('A senha deve ter ao menos $senhaMinima caracteres.');
+    }
+    try {
+      await _supabase.auth.updateUser(UserAttributes(password: novaSenha));
+    } on AuthException catch (e) {
+      throw Exception(_mensagemErro(e));
+    }
+  }
+
   /// Reenvia o email de confirmação de cadastro (apoio à US 4.2).
   Future<void> reenviarConfirmacao(String email) async {
     if (!emailInstitucionalValido(email)) {
