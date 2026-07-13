@@ -10,11 +10,13 @@ void main() {
         'descricao': 'Grande buraco próximo ao IC-3',
         'localizacao': 'IC-3',
         'autor': 'Maria',
+        'autor_id': 'user-789',
         'created_at': '2024-01-15T10:00:00.000Z',
         'categoria': 'infraestrutura',
         'foto_url': 'https://example.com/foto.jpg',
         'latitude': -22.8123,
         'longitude': -47.0654,
+        'status': 'Resolvida',
       };
 
       final denuncia = Denuncia.fromJson(json);
@@ -24,11 +26,43 @@ void main() {
       expect(denuncia.descricao, equals('Grande buraco próximo ao IC-3'));
       expect(denuncia.localizacao, equals('IC-3'));
       expect(denuncia.autor, equals('Maria'));
+      expect(denuncia.autorId, equals('user-789'));
       expect(denuncia.createdAt, equals(DateTime.parse('2024-01-15T10:00:00.000Z')));
       expect(denuncia.categoria, equals(Categoria.infraestrutura));
       expect(denuncia.fotoUrl, equals('https://example.com/foto.jpg'));
       expect(denuncia.latitude, equals(-22.8123));
       expect(denuncia.longitude, equals(-47.0654));
+      expect(denuncia.status, equals('Resolvida'));
+    });
+
+    test('autorId é nulo quando ausente do json', () {
+      final json = {
+        'id': 'abc-123',
+        'titulo': 'Título',
+        'descricao': 'Descrição',
+        'localizacao': 'Local',
+        'autor': 'João',
+        'created_at': null,
+      };
+
+      final denuncia = Denuncia.fromJson(json);
+
+      expect(denuncia.autorId, isNull);
+    });
+
+    test('usa status "Aberta" quando ausente do json', () {
+      final json = {
+        'id': 'abc-123',
+        'titulo': 'Título',
+        'descricao': 'Descrição',
+        'localizacao': 'Local',
+        'autor': 'João',
+        'created_at': null,
+      };
+
+      final denuncia = Denuncia.fromJson(json);
+
+      expect(denuncia.status, equals('Aberta'));
     });
 
     test('usa "Anônimo" quando autor é nulo', () {
@@ -100,10 +134,12 @@ void main() {
         descricao: 'Lâmpada queimada no corredor',
         localizacao: 'CB',
         autor: 'Ana',
+        autorId: 'user-789',
         categoria: Categoria.seguranca,
         fotoUrl: 'https://example.com/foto.jpg',
         latitude: -22.8123,
         longitude: -47.0654,
+        status: 'Em andamento',
       );
 
       final json = denuncia.toJson();
@@ -112,10 +148,12 @@ void main() {
       expect(json['descricao'], equals('Lâmpada queimada no corredor'));
       expect(json['localizacao'], equals('CB'));
       expect(json['autor'], equals('Ana'));
+      expect(json['autor_id'], equals('user-789'));
       expect(json['categoria'], equals('seguranca'));
       expect(json['foto_url'], equals('https://example.com/foto.jpg'));
       expect(json['latitude'], equals(-22.8123));
       expect(json['longitude'], equals(-47.0654));
+      expect(json['status'], equals('Em andamento'));
     });
 
     test('não inclui id nem created_at', () {
@@ -129,6 +167,30 @@ void main() {
 
       expect(json.containsKey('id'), isFalse);
       expect(json.containsKey('created_at'), isFalse);
+    });
+
+    test('não inclui autor_id quando nulo', () {
+      final denuncia = Denuncia(
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+      );
+
+      final json = denuncia.toJson();
+
+      expect(json.containsKey('autor_id'), isFalse);
+    });
+
+    test('usa status "Aberta" como padrão no toJson', () {
+      final denuncia = Denuncia(
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+      );
+
+      final json = denuncia.toJson();
+
+      expect(json['status'], equals('Aberta'));
     });
 
     test('serializa categoria como nome do enum', () {

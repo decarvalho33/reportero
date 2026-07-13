@@ -50,9 +50,17 @@ class DenunciaService {
   }
 
   /// Envia uma denúncia para o banco de dados, após validar as coordenadas.
+  ///
+  /// O autor_id é preenchido com o id do usuário autenticado no momento do
+  /// envio (Épico 5). Sem sessão ativa, a denúncia é enviada sem dono (nulo).
   Future<void> enviarDenuncia(Denuncia denuncia) async {
     _validarCoordenadas(denuncia.latitude, denuncia.longitude);
-    await _supabase.from('denuncias').insert(denuncia.toJson());
+    final dados = denuncia.toJson();
+    final autorId = _supabase.auth.currentUser?.id;
+    if (autorId != null) {
+      dados['autor_id'] = autorId;
+    }
+    await _supabase.from('denuncias').insert(dados);
   }
 
   /// Obtém todas as denúncias do banco de dados, ordenadas pela data de criação em ordem decrescente.

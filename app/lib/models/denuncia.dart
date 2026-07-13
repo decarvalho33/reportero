@@ -42,6 +42,7 @@ class Denuncia {
   final String descricao;
   final String localizacao;
   final String autor;
+  final String? autorId;
   final Categoria categoria;
   final double? latitude;
   final double? longitude;
@@ -49,6 +50,7 @@ class Denuncia {
   final DateTime? createdAt;
   final int totalApoios;
   final bool jaApoiei;
+  final String status;
 
   Denuncia({
     this.id,
@@ -56,6 +58,7 @@ class Denuncia {
     required this.descricao,
     required this.localizacao,
     this.autor = "Anônimo",
+    this.autorId,
     this.categoria = Categoria.outros,
     this.latitude,
     this.longitude,
@@ -63,6 +66,7 @@ class Denuncia {
     this.createdAt,
     this.totalApoios = 0,
     this.jaApoiei = false,
+    this.status = 'Aberta',
   });
 
   factory Denuncia.fromJson(Map<String, dynamic> json) {
@@ -72,6 +76,7 @@ class Denuncia {
       descricao: json['descricao'],
       localizacao: json['localizacao'],
       autor: json['autor'] ?? "Anônimo",
+      autorId: json['autor_id'],
       categoria: Categoria.fromBanco(json['categoria']),
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
@@ -80,6 +85,7 @@ class Denuncia {
           ? DateTime.parse(json['created_at'])
           : null,
       totalApoios: _parseTotalApoios(json['apoios']),
+      status: json['status'] ?? 'Aberta',
     );
   }
 
@@ -103,6 +109,7 @@ class Denuncia {
       descricao: descricao,
       localizacao: localizacao,
       autor: autor,
+      autorId: autorId,
       categoria: categoria,
       latitude: latitude,
       longitude: longitude,
@@ -110,6 +117,7 @@ class Denuncia {
       createdAt: createdAt,
       totalApoios: totalApoios ?? this.totalApoios,
       jaApoiei: jaApoiei ?? this.jaApoiei,
+      status: status,
     );
   }
 
@@ -119,10 +127,12 @@ class Denuncia {
       'descricao': descricao,
       'localizacao': localizacao,
       'autor': autor,
+      if (autorId != null) 'autor_id': autorId,
       'categoria': categoria.name,
       'latitude': latitude,
       'longitude': longitude,
       if (fotoUrl != null) 'foto_url': fotoUrl,
+      'status': status,
     };
   }
 }
