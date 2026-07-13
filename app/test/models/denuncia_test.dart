@@ -32,7 +32,7 @@ void main() {
       expect(denuncia.fotoUrl, equals('https://example.com/foto.jpg'));
       expect(denuncia.latitude, equals(-22.8123));
       expect(denuncia.longitude, equals(-47.0654));
-      expect(denuncia.status, equals('Resolvida'));
+      expect(denuncia.status, equals(StatusDenuncia.resolvida));
     });
 
     test('autorId é nulo quando ausente do json', () {
@@ -50,7 +50,7 @@ void main() {
       expect(denuncia.autorId, isNull);
     });
 
-    test('usa status "Aberta" quando ausente do json', () {
+    test('usa status pendente (padrão) quando ausente do json', () {
       final json = {
         'id': 'abc-123',
         'titulo': 'Título',
@@ -62,7 +62,7 @@ void main() {
 
       final denuncia = Denuncia.fromJson(json);
 
-      expect(denuncia.status, equals('Aberta'));
+      expect(denuncia.status, equals(StatusDenuncia.pendente));
     });
 
     test('usa "Anônimo" quando autor é nulo', () {
@@ -139,7 +139,7 @@ void main() {
         fotoUrl: 'https://example.com/foto.jpg',
         latitude: -22.8123,
         longitude: -47.0654,
-        status: 'Em andamento',
+        status: StatusDenuncia.emAnalise,
       );
 
       final json = denuncia.toJson();
@@ -153,7 +153,7 @@ void main() {
       expect(json['foto_url'], equals('https://example.com/foto.jpg'));
       expect(json['latitude'], equals(-22.8123));
       expect(json['longitude'], equals(-47.0654));
-      expect(json['status'], equals('Em andamento'));
+      expect(json['status'], equals('Em Análise'));
     });
 
     test('não inclui id nem created_at', () {
@@ -181,7 +181,7 @@ void main() {
       expect(json.containsKey('autor_id'), isFalse);
     });
 
-    test('usa status "Aberta" como padrão no toJson', () {
+    test('usa status pendente (padrão) no toJson', () {
       final denuncia = Denuncia(
         titulo: 'Título',
         descricao: 'Descrição',
@@ -190,7 +190,7 @@ void main() {
 
       final json = denuncia.toJson();
 
-      expect(json['status'], equals('Aberta'));
+      expect(json['status'], equals('Pendente'));
     });
 
     test('serializa categoria como nome do enum', () {

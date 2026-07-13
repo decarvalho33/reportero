@@ -162,7 +162,7 @@ class _MinhasDenunciasScreenState extends State<MinhasDenunciasScreen> {
                   ),
                   ..._viewModel.statusDisponiveis.map(
                     (s) => _buildFiltroChip(
-                      s,
+                      s.label,
                       selecionado: _viewModel.filtroStatus == s,
                       onSelected: () => _viewModel.filtrarPorStatus(
                         _viewModel.filtroStatus == s ? null : s,
@@ -286,7 +286,7 @@ class _MinhaDenunciaTile extends StatelessWidget {
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
               Chip(
-                label: Text(denuncia.status),
+                label: Text(denuncia.status.label),
                 backgroundColor: _corStatus(denuncia.status),
                 visualDensity: VisualDensity.compact,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -317,13 +317,13 @@ class _MinhaDenunciaTile extends StatelessWidget {
     );
   }
 
-  Color _corStatus(String status) {
-    switch (status.toLowerCase()) {
-      case 'resolvida':
+  Color _corStatus(StatusDenuncia status) {
+    switch (status) {
+      case StatusDenuncia.resolvida:
         return Colors.green[100]!;
-      case 'em andamento':
+      case StatusDenuncia.emAnalise:
         return Colors.amber[100]!;
-      default:
+      case StatusDenuncia.pendente:
         return Colors.grey[200]!;
     }
   }

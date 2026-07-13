@@ -72,7 +72,7 @@ void main() {
       expect(resultado.first.fotoUrl, equals('https://example.com/foto.jpg'));
       expect(resultado.first.latitude, closeTo(-22.8123, 0.0001));
       expect(resultado.first.longitude, closeTo(-47.0654, 0.0001));
-      expect(resultado.first.status, equals('Aberta'));
+      expect(resultado.first.status, equals(StatusDenuncia.pendente));
     });
 
     test('enviarDenuncia deixa autor_id nulo quando não há usuário autenticado', () async {

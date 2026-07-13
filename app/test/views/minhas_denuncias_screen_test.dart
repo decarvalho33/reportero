@@ -33,7 +33,7 @@ void main() {
       descricao: 'Descrição',
       localizacao: 'IC-3',
       categoria: Categoria.infraestrutura,
-      status: 'Em andamento',
+      status: StatusDenuncia.emAnalise,
       createdAt: DateTime(2024, 3, 10),
     );
     final viewModel = MinhasDenunciasViewModel(
@@ -50,7 +50,7 @@ void main() {
     // "Infraestrutura" também aparece como chip de filtro de categoria, além
     // do chip no resumo da denúncia — por isso findsWidgets, não findsOneWidget.
     expect(find.text('Infraestrutura'), findsWidgets);
-    expect(find.text('Em andamento'), findsOneWidget);
+    expect(find.text('Em Análise'), findsOneWidget);
     expect(find.text('10/03/2024'), findsOneWidget);
   });
 
@@ -99,7 +99,7 @@ void main() {
       descricao: 'Calçada danificada',
       localizacao: 'IC-3',
       categoria: Categoria.infraestrutura,
-      status: 'Aberta',
+      status: StatusDenuncia.pendente,
     );
     final seguranca = Denuncia(
       id: '2',
@@ -107,7 +107,7 @@ void main() {
       descricao: 'Porta do banheiro foi arrombada',
       localizacao: 'CB',
       categoria: Categoria.seguranca,
-      status: 'Resolvida',
+      status: StatusDenuncia.resolvida,
     );
 
     Future<MinhasDenunciasViewModel> montarTela(WidgetTester tester) async {

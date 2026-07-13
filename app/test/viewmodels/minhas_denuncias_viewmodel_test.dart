@@ -90,7 +90,7 @@ void main() {
       descricao: 'Calçada danificada',
       localizacao: 'IC-3',
       categoria: Categoria.infraestrutura,
-      status: 'Aberta',
+      status: StatusDenuncia.pendente,
     );
     final seguranca = Denuncia(
       id: '2',
@@ -98,7 +98,7 @@ void main() {
       descricao: 'Porta do banheiro foi arrombada',
       localizacao: 'CB',
       categoria: Categoria.seguranca,
-      status: 'Resolvida',
+      status: StatusDenuncia.resolvida,
     );
 
     late MinhasDenunciasViewModel viewModel;
@@ -123,14 +123,14 @@ void main() {
     });
 
     test('filtrarPorStatus restringe ao status selecionado', () {
-      viewModel.filtrarPorStatus('Resolvida');
+      viewModel.filtrarPorStatus(StatusDenuncia.resolvida);
 
       expect(viewModel.denuncias, equals([seguranca]));
     });
 
     test('filtros combinados (texto + categoria + status) funcionam juntos', () {
       viewModel.filtrarPorCategoria(Categoria.infraestrutura);
-      viewModel.filtrarPorStatus('Aberta');
+      viewModel.filtrarPorStatus(StatusDenuncia.pendente);
       viewModel.filtrarPorTexto('buraco');
 
       expect(viewModel.denuncias, equals([infra]));
@@ -143,8 +143,11 @@ void main() {
       expect(viewModel.denuncias.length, equals(2));
     });
 
-    test('statusDisponiveis reflete os status distintos presentes na lista', () {
-      expect(viewModel.statusDisponiveis, equals(['Aberta', 'Resolvida']));
+    test('statusDisponiveis reflete os status distintos presentes na lista, na ordem do enum', () {
+      expect(
+        viewModel.statusDisponiveis,
+        equals([StatusDenuncia.pendente, StatusDenuncia.resolvida]),
+      );
     });
 
     test('temDenunciasCadastradas é true quando há denúncias carregadas', () {

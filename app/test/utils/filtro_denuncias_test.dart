@@ -8,7 +8,7 @@ final _infra = Denuncia(
   descricao: 'Calçada danificada perto do IC-3',
   localizacao: 'IC-3',
   categoria: Categoria.infraestrutura,
-  status: 'Aberta',
+  status: StatusDenuncia.pendente,
 );
 final _seguranca = Denuncia(
   id: '2',
@@ -16,7 +16,7 @@ final _seguranca = Denuncia(
   descricao: 'Porta do banheiro foi arrombada',
   localizacao: 'CB',
   categoria: Categoria.seguranca,
-  status: 'Resolvida',
+  status: StatusDenuncia.resolvida,
 );
 
 void main() {
@@ -50,8 +50,8 @@ void main() {
     });
 
     test('filtra pelo status exato', () {
-      expect(FiltroDenuncias.passaStatus(_infra, 'Aberta'), isTrue);
-      expect(FiltroDenuncias.passaStatus(_infra, 'Resolvida'), isFalse);
+      expect(FiltroDenuncias.passaStatus(_infra, StatusDenuncia.pendente), isTrue);
+      expect(FiltroDenuncias.passaStatus(_infra, StatusDenuncia.resolvida), isFalse);
     });
   });
 
@@ -61,7 +61,7 @@ void main() {
         [_infra, _seguranca],
         texto: 'porta',
         categoria: Categoria.seguranca,
-        status: 'Resolvida',
+        status: StatusDenuncia.resolvida,
       );
 
       expect(resultado, equals([_seguranca]));

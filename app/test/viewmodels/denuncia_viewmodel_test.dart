@@ -130,7 +130,7 @@ void main() {
       latitude: -22.8123,
       longitude: -47.0654,
       fotoUrl: 'https://example.com/foto.jpg',
-      status: 'Em andamento',
+      status: StatusDenuncia.emAnalise,
     );
 
     test('sem denúncia existente, emEdicao é false', () {

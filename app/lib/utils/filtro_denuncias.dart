@@ -14,14 +14,14 @@ class FiltroDenuncias {
   static bool passaCategoria(Denuncia denuncia, Categoria? categoria) =>
       categoria == null || denuncia.categoria == categoria;
 
-  static bool passaStatus(Denuncia denuncia, String? status) =>
+  static bool passaStatus(Denuncia denuncia, StatusDenuncia? status) =>
       status == null || denuncia.status == status;
 
   static List<Denuncia> aplicar(
     List<Denuncia> lista, {
     String texto = '',
     Categoria? categoria,
-    String? status,
+    StatusDenuncia? status,
   }) {
     return lista
         .where((d) =>

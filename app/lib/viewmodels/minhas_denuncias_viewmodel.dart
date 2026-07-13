@@ -23,21 +23,23 @@ class MinhasDenunciasViewModel extends ChangeNotifier {
   String? _erro;
   String _filtroTexto = '';
   Categoria? _filtroCategoria;
-  String? _filtroStatus;
+  StatusDenuncia? _filtroStatus;
 
   List<Denuncia> get denuncias => _denunciasFiltradas;
   bool get isLoading => _isLoading;
   String? get erro => _erro;
   bool get estaLogado => _auth.estaLogado;
   Categoria? get filtroCategoria => _filtroCategoria;
-  String? get filtroStatus => _filtroStatus;
+  StatusDenuncia? get filtroStatus => _filtroStatus;
   bool get temDenunciasCadastradas => _todasDenuncias.isNotEmpty;
 
-  /// Status distintos entre as denúncias do usuário, para montar os filtros
-  /// (não há um enum fixo de status — a coluna é texto livre, hoje só
-  /// populada por 'Aberta').
-  List<String> get statusDisponiveis =>
-      _todasDenuncias.map((d) => d.status).toSet().toList()..sort();
+  /// Status distintos entre as denúncias do usuário, na ordem do enum
+  /// (pendente, em análise, resolvida), para montar os filtros.
+  List<StatusDenuncia> get statusDisponiveis {
+    final presentes = _todasDenuncias.map((d) => d.status).toSet().toList();
+    presentes.sort((a, b) => a.index.compareTo(b.index));
+    return presentes;
+  }
 
   Future<void> carregar() async {
     _isLoading = true;
@@ -67,7 +69,7 @@ class MinhasDenunciasViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void filtrarPorStatus(String? status) {
+  void filtrarPorStatus(StatusDenuncia? status) {
     _filtroStatus = status;
     _aplicarFiltros();
     notifyListeners();
