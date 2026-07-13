@@ -7,6 +7,7 @@ import 'views/cadastro_screen.dart';
 import 'views/recuperar_senha_screen.dart';
 import 'views/nova_senha_screen.dart';
 import 'views/profile_screen.dart';
+import 'views/minhas_denuncias_screen.dart';
 
 /// Ponto de entrada principal do aplicativo, responsável por inicializar o Supabase e configurar a aplicação Flutter.
 Future<void> main() async {
@@ -62,6 +63,7 @@ class _ReporteroAppState extends State<ReporteroApp> {
         '/recuperar-senha': (context) => const RecuperarSenhaScreen(),
         '/nova-senha': (context) => const NovaSenhaScreen(),
         '/perfil': (context) => const ProfileScreen(),
+        '/minhas-denuncias': (context) => const MinhasDenunciasScreen(),
       },
     );
   }

@@ -82,6 +82,22 @@ class DenunciaService {
     }).toList();
   }
 
+  /// Obtém apenas as denúncias registradas pelo usuário autenticado (US 5.3),
+  /// ordenadas pela data de criação em ordem decrescente. Sem sessão ativa,
+  /// retorna lista vazia.
+  Future<List<Denuncia>> obterMinhasDenuncias() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return [];
+
+    final response = await _supabase
+        .from('denuncias')
+        .select()
+        .eq('autor_id', userId)
+        .order('created_at', ascending: false);
+
+    return (response as List).map((json) => Denuncia.fromJson(json)).toList();
+  }
+
   /// Registra o apoio (upvote) do dispositivo atual em uma denúncia.
   ///
   /// É idempotente: se o apoio já existir, a violação de unicidade é ignorada,
