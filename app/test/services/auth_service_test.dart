@@ -122,4 +122,87 @@ void main() {
       );
     });
   });
+
+  // Tabela de decisão. Condições: email válido, senha válida, nome
+  // preenchido. A verificação segue essa ordem e para no primeiro erro,
+  // o que reduz a tabela a 4 regras:
+  //   R1: email inválido               -> mensagem de email
+  //   R2: email ok, senha inválida     -> mensagem de senha
+  //   R3: email e senha ok, nome vazio -> mensagem de nome
+  //   R4: tudo válido                  -> null
+  group('validarCadastro', () {
+    const msgEmail = 'Use um email institucional da UNICAMP (@unicamp.br).';
+    const msgSenha = 'A senha deve ter ao menos 6 caracteres.';
+    const msgNome = 'Informe seu nome.';
+
+    // Senha e nome também inválidos: garante que a mensagem de email tem
+    // precedência sobre as demais.
+    test('R1: email inválido retorna a mensagem de email', () {
+      expect(
+        AuthService.validarCadastro(
+          nome: '',
+          email: 'ana@gmail.com',
+          senha: '123',
+        ),
+        equals(msgEmail),
+      );
+    });
+
+    // Senha no valor limite inválido (5) e nome vazio: garante a
+    // precedência da senha sobre o nome.
+    test('R2: senha curta retorna a mensagem de senha', () {
+      expect(
+        AuthService.validarCadastro(
+          nome: '',
+          email: 'ana@unicamp.br',
+          senha: '12345',
+        ),
+        equals(msgSenha),
+      );
+    });
+
+    test('R3: nome vazio retorna a mensagem de nome', () {
+      expect(
+        AuthService.validarCadastro(
+          nome: '',
+          email: 'ana@unicamp.br',
+          senha: '123456',
+        ),
+        equals(msgNome),
+      );
+    });
+
+    test('R3: nome só com espaços conta como vazio', () {
+      expect(
+        AuthService.validarCadastro(
+          nome: '   ',
+          email: 'ana@unicamp.br',
+          senha: '123456',
+        ),
+        equals(msgNome),
+      );
+    });
+
+    test('R4: dados válidos retornam null', () {
+      expect(
+        AuthService.validarCadastro(
+          nome: 'Ana',
+          email: 'ana@dac.unicamp.br',
+          senha: '123456',
+        ),
+        isNull,
+      );
+    });
+
+    test('cadastrar barra dados inválidos antes de chamar a rede', () async {
+      await expectLater(
+        AuthService().cadastrar(
+          nome: '',
+          email: 'ana@gmail.com',
+          senha: '123',
+        ),
+        throwsArgumentError,
+      );
+    });
+  });
 }
