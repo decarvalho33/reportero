@@ -73,11 +73,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                 if (!logado) {
                                   Navigator.pushNamed(context, '/login');
                                 } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Tela de perfil'),
-                                    ),
-                                  );
+                                  Navigator.pushNamed(context, '/perfil');
                                 }
                               },
                               tooltip: logado ? 'Perfil' : 'Entrar',
@@ -93,11 +89,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                 if (!logado) {
                                   Navigator.pushNamed(context, '/login');
                                 } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Tela de perfil'),
-                                    ),
-                                  );
+                                  Navigator.pushNamed(context, '/perfil');
                                 }
                               },
                               style: TextButton.styleFrom(

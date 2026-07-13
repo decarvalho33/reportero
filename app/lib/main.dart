@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'models/denuncia.dart';
 import 'views/formulario_denuncia_screen.dart';
 import 'views/feed_screen.dart';
 import 'views/login_screen.dart';
 import 'views/cadastro_screen.dart';
 import 'views/recuperar_senha_screen.dart';
 import 'views/nova_senha_screen.dart';
+import 'views/profile_screen.dart';
+import 'views/minhas_denuncias_screen.dart';
 
 /// Ponto de entrada principal do aplicativo, responsável por inicializar o Supabase e configurar a aplicação Flutter.
 Future<void> main() async {
@@ -55,11 +58,15 @@ class _ReporteroAppState extends State<ReporteroApp> {
       initialRoute: '/feed',
       routes: {
         '/feed': (context) => const FeedScreen(),
-        '/nova': (context) => const FormularioDenunciaScreen(),
+        '/nova': (context) => FormularioDenunciaScreen(
+              denuncia: ModalRoute.of(context)?.settings.arguments as Denuncia?,
+            ),
         '/login': (context) => const LoginScreen(),
         '/cadastro': (context) => const CadastroScreen(),
         '/recuperar-senha': (context) => const RecuperarSenhaScreen(),
         '/nova-senha': (context) => const NovaSenhaScreen(),
+        '/perfil': (context) => const ProfileScreen(),
+        '/minhas-denuncias': (context) => const MinhasDenunciasScreen(),
       },
     );
   }

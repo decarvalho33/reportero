@@ -117,4 +117,56 @@ void main() {
       expect(notificou, equals(2));
     });
   });
+
+  group('modo de edição (US 5.6/5.7)', () {
+    final denunciaExistente = Denuncia(
+      id: 'abc-123',
+      titulo: 'Buraco na calçada',
+      descricao: 'Descrição original',
+      localizacao: 'IC-3',
+      autor: 'Maria',
+      autorId: 'user-1',
+      categoria: Categoria.infraestrutura,
+      latitude: -22.8123,
+      longitude: -47.0654,
+      fotoUrl: 'https://example.com/foto.jpg',
+      status: StatusDenuncia.emAnalise,
+    );
+
+    test('sem denúncia existente, emEdicao é false', () {
+      expect(viewModel.emEdicao, isFalse);
+    });
+
+    test('com denúncia existente, pré-preenche os campos do formulário', () {
+      final editando = DenunciaViewModel(denunciaExistente: denunciaExistente);
+
+      expect(editando.emEdicao, isTrue);
+      expect(editando.tituloCtrl.text, equals('Buraco na calçada'));
+      expect(editando.localCtrl.text, equals('IC-3'));
+      expect(editando.descCtrl.text, equals('Descrição original'));
+      expect(editando.autorCtrl.text, equals('Maria'));
+      expect(editando.categoriaSelecionada, equals(Categoria.infraestrutura));
+      expect(editando.latitude, equals(-22.8123));
+      expect(editando.longitude, equals(-47.0654));
+      expect(editando.fotoUrlExistente, equals('https://example.com/foto.jpg'));
+
+      editando.limpar();
+    });
+
+    test('autor "Anônimo" é pré-preenchido como campo vazio (para reedição)', () {
+      final anonima = Denuncia(
+        id: 'xyz',
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+        autor: 'Anônimo',
+        autorId: 'user-1',
+      );
+      final editando = DenunciaViewModel(denunciaExistente: anonima);
+
+      expect(editando.autorCtrl.text, isEmpty);
+
+      editando.limpar();
+    });
+  });
 }

@@ -72,6 +72,20 @@ void main() {
       expect(resultado.first.fotoUrl, equals('https://example.com/foto.jpg'));
       expect(resultado.first.latitude, closeTo(-22.8123, 0.0001));
       expect(resultado.first.longitude, closeTo(-47.0654, 0.0001));
+      expect(resultado.first.status, equals(StatusDenuncia.pendente));
+    });
+
+    test('enviarDenuncia deixa autor_id nulo quando não há usuário autenticado', () async {
+      final denuncia = Denuncia(
+        titulo: 'Denúncia anônima',
+        descricao: 'Enviada sem sessão ativa',
+        localizacao: 'IC-3',
+      );
+
+      await service.enviarDenuncia(denuncia);
+
+      final resultado = await service.obtenerDenuncias();
+      expect(resultado.first.autorId, isNull);
     });
 
     test('enviarDenuncia lanca erro quando apenas latitude e fornecida', () async {
@@ -172,6 +186,56 @@ void main() {
         expect(resultado.last.titulo, equals('Primeira'));
       },
     );
+  });
+
+  group('DenunciaService — restrição de autoria (US 5.6/5.7)', () {
+    // Sem sessão ativa (a suíte usa a anon key, sem login), currentUser é
+    // sempre nulo — então qualquer editarDenuncia/excluirDenuncia deve ser
+    // recusado pela checagem de autoria antes de qualquer chamada de rede,
+    // independentemente de a denúncia ter dono ou não.
+    test('editarDenuncia recusa a edição sem usuário autenticado', () async {
+      final denuncia = Denuncia(
+        id: '00000000-0000-0000-0000-000000000001',
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+        autorId: 'algum-usuario',
+      );
+
+      expect(
+        () => service.editarDenuncia(denuncia),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('excluirDenuncia recusa a exclusão sem usuário autenticado', () async {
+      final denuncia = Denuncia(
+        id: '00000000-0000-0000-0000-000000000001',
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+        autorId: 'algum-usuario',
+      );
+
+      expect(
+        () => service.excluirDenuncia(denuncia),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('excluirDenuncia recusa mesmo quando a denúncia não tem autor_id', () async {
+      final denunciaOrfa = Denuncia(
+        id: '00000000-0000-0000-0000-000000000002',
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+      );
+
+      expect(
+        () => service.excluirDenuncia(denunciaOrfa),
+        throwsA(isA<Exception>()),
+      );
+    });
   });
 
   group('DenunciaService — apoios', () {
