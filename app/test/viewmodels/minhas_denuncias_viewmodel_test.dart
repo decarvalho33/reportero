@@ -158,4 +158,44 @@ void main() {
       expect(vazio.temDenunciasCadastradas, isFalse);
     });
   });
+
+  group('excluir', () {
+    final denuncia = Denuncia(
+      id: '1',
+      titulo: 'Buraco na calçada',
+      descricao: 'Desc',
+      localizacao: 'IC-3',
+      autorId: 'user-1',
+    );
+
+    test('remove a denúncia da lista quando a exclusão é bem-sucedida', () async {
+      Denuncia? excluidaRecebida;
+      final viewModel = MinhasDenunciasViewModel(
+        authService: _FakeAuthService(_usuarioLogado),
+        excluirDenuncia: (d) async => excluidaRecebida = d,
+      );
+      viewModel.carregarDenunciasLocais([denuncia]);
+
+      final sucesso = await viewModel.excluir(denuncia);
+
+      expect(sucesso, isTrue);
+      expect(excluidaRecebida, equals(denuncia));
+      expect(viewModel.denuncias, isEmpty);
+    });
+
+    test('mantém a lista e define erro quando a exclusão falha', () async {
+      final viewModel = MinhasDenunciasViewModel(
+        authService: _FakeAuthService(_usuarioLogado),
+        excluirDenuncia: (d) async =>
+            throw Exception('Você só pode editar ou excluir suas próprias denúncias.'),
+      );
+      viewModel.carregarDenunciasLocais([denuncia]);
+
+      final sucesso = await viewModel.excluir(denuncia);
+
+      expect(sucesso, isFalse);
+      expect(viewModel.erro, isNotNull);
+      expect(viewModel.denuncias, equals([denuncia]));
+    });
+  });
 }

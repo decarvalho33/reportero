@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'models/denuncia.dart';
 import 'views/formulario_denuncia_screen.dart';
 import 'views/feed_screen.dart';
 import 'views/login_screen.dart';
@@ -57,7 +58,9 @@ class _ReporteroAppState extends State<ReporteroApp> {
       initialRoute: '/feed',
       routes: {
         '/feed': (context) => const FeedScreen(),
-        '/nova': (context) => const FormularioDenunciaScreen(),
+        '/nova': (context) => FormularioDenunciaScreen(
+              denuncia: ModalRoute.of(context)?.settings.arguments as Denuncia?,
+            ),
         '/login': (context) => const LoginScreen(),
         '/cadastro': (context) => const CadastroScreen(),
         '/recuperar-senha': (context) => const RecuperarSenhaScreen(),

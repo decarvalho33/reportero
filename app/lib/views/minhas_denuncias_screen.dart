@@ -47,6 +47,46 @@ class _MinhasDenunciasScreenState extends State<MinhasDenunciasScreen> {
     if (mounted) setState(() {});
   }
 
+  Future<void> _editar(Denuncia denuncia) async {
+    await Navigator.pushNamed(context, '/nova', arguments: denuncia);
+    if (mounted) _viewModel.carregar();
+  }
+
+  Future<void> _confirmarExclusao(Denuncia denuncia) async {
+    final confirmou = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Excluir denúncia'),
+        content: Text(
+          'Tem certeza que deseja excluir "${denuncia.titulo}"? Essa ação não pode ser desfeita.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+    if (confirmou != true) return;
+
+    final sucesso = await _viewModel.excluir(denuncia);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          sucesso ? 'Denúncia excluída.' : (_viewModel.erro ?? 'Erro ao excluir.'),
+        ),
+        backgroundColor: sucesso ? null : Colors.redAccent,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -198,16 +238,28 @@ class _MinhasDenunciasScreenState extends State<MinhasDenunciasScreen> {
     return ListView.builder(
       padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: _viewModel.denuncias.length,
-      itemBuilder: (context, index) =>
-          _MinhaDenunciaTile(denuncia: _viewModel.denuncias[index]),
+      itemBuilder: (context, index) {
+        final denuncia = _viewModel.denuncias[index];
+        return _MinhaDenunciaTile(
+          denuncia: denuncia,
+          onEditar: () => _editar(denuncia),
+          onExcluir: () => _confirmarExclusao(denuncia),
+        );
+      },
     );
   }
 }
 
 class _MinhaDenunciaTile extends StatelessWidget {
-  const _MinhaDenunciaTile({required this.denuncia});
+  const _MinhaDenunciaTile({
+    required this.denuncia,
+    required this.onEditar,
+    required this.onExcluir,
+  });
 
   final Denuncia denuncia;
+  final VoidCallback onEditar;
+  final VoidCallback onExcluir;
 
   @override
   Widget build(BuildContext context) {
@@ -245,6 +297,21 @@ class _MinhaDenunciaTile extends StatelessWidget {
               ),
             ],
           ),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Editar',
+              onPressed: onEditar,
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              tooltip: 'Excluir',
+              onPressed: onExcluir,
+            ),
+          ],
         ),
       ),
     );

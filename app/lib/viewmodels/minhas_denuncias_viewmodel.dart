@@ -7,11 +7,14 @@ import '../utils/filtro_denuncias.dart';
 class MinhasDenunciasViewModel extends ChangeNotifier {
   MinhasDenunciasViewModel({
     Future<List<Denuncia>> Function()? buscarDenuncias,
+    Future<void> Function(Denuncia)? excluirDenuncia,
     AuthService? authService,
   })  : _buscarDenuncias = buscarDenuncias ?? DenunciaService().obterMinhasDenuncias,
+        _excluirDenuncia = excluirDenuncia ?? DenunciaService().excluirDenuncia,
         _auth = authService ?? AuthService();
 
   final Future<List<Denuncia>> Function() _buscarDenuncias;
+  final Future<void> Function(Denuncia) _excluirDenuncia;
   final AuthService _auth;
 
   List<Denuncia> _todasDenuncias = [];
@@ -68,6 +71,23 @@ class MinhasDenunciasViewModel extends ChangeNotifier {
     _filtroStatus = status;
     _aplicarFiltros();
     notifyListeners();
+  }
+
+  /// Exclui a denúncia (US 5.6/5.7) e a remove da lista local em caso de
+  /// sucesso. A restrição de autoria é garantida pelo service/RLS; aqui só
+  /// tratamos o resultado.
+  Future<bool> excluir(Denuncia denuncia) async {
+    try {
+      await _excluirDenuncia(denuncia);
+      _todasDenuncias.removeWhere((d) => d.id == denuncia.id);
+      _aplicarFiltros();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _erro = 'Não foi possível excluir a denúncia.';
+      notifyListeners();
+      return false;
+    }
   }
 
   void _aplicarFiltros() {

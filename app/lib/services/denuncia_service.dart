@@ -82,6 +82,31 @@ class DenunciaService {
     }).toList();
   }
 
+  /// Atualiza uma denúncia existente (US 5.6/5.7). Só o autor pode editar —
+  /// esta checagem é só uma barreira rápida de UX; quem garante de verdade é
+  /// a RLS (`auth.uid() = autor_id`) da tabela `denuncias`.
+  Future<void> editarDenuncia(Denuncia denuncia) async {
+    _garantirAutoria(denuncia);
+    _validarCoordenadas(denuncia.latitude, denuncia.longitude);
+    await _supabase.from('denuncias').update(denuncia.toJson()).eq('id', denuncia.id!);
+  }
+
+  /// Exclui uma denúncia existente (US 5.6/5.7). Mesma checagem de autoria
+  /// de [editarDenuncia], reforçada pela RLS no banco.
+  Future<void> excluirDenuncia(Denuncia denuncia) async {
+    _garantirAutoria(denuncia);
+    await _supabase.from('denuncias').delete().eq('id', denuncia.id!);
+  }
+
+  /// Garante que a denúncia pertence ao usuário autenticado antes de editar
+  /// ou excluir.
+  void _garantirAutoria(Denuncia denuncia) {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null || denuncia.autorId == null || denuncia.autorId != userId) {
+      throw Exception('Você só pode editar ou excluir suas próprias denúncias.');
+    }
+  }
+
   /// Obtém apenas as denúncias registradas pelo usuário autenticado (US 5.3),
   /// ordenadas pela data de criação em ordem decrescente. Sem sessão ativa,
   /// retorna lista vazia.

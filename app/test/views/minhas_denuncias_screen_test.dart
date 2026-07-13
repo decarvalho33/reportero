@@ -167,4 +167,86 @@ void main() {
       },
     );
   });
+
+  group('editar e excluir (US 5.6/5.7)', () {
+    final denuncia = Denuncia(
+      id: '1',
+      titulo: 'Buraco na calçada',
+      descricao: 'Descrição',
+      localizacao: 'IC-3',
+      autorId: 'user-1',
+    );
+
+    testWidgets('toque em editar navega para /nova com a denúncia como argumento', (
+      tester,
+    ) async {
+      final viewModel = MinhasDenunciasViewModel(
+        buscarDenuncias: () async => [denuncia],
+        authService: _FakeAuthService(_usuarioLogado),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MinhasDenunciasScreen(viewModel: viewModel),
+          routes: {
+            '/nova': (context) {
+              final arg = ModalRoute.of(context)?.settings.arguments as Denuncia?;
+              return Scaffold(body: Text('Editando: ${arg?.titulo}'));
+            },
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Editar'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Editando: Buraco na calçada'), findsOneWidget);
+    });
+
+    testWidgets('cancelar a exclusão mantém a denúncia na lista', (tester) async {
+      var excluirChamado = false;
+      final viewModel = MinhasDenunciasViewModel(
+        buscarDenuncias: () async => [denuncia],
+        authService: _FakeAuthService(_usuarioLogado),
+        excluirDenuncia: (d) async => excluirChamado = true,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(home: MinhasDenunciasScreen(viewModel: viewModel)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Excluir'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Cancelar'));
+      await tester.pumpAndSettle();
+
+      expect(excluirChamado, isFalse);
+      expect(find.text('Buraco na calçada'), findsOneWidget);
+    });
+
+    testWidgets('confirmar a exclusão remove a denúncia da lista', (tester) async {
+      Denuncia? excluida;
+      final viewModel = MinhasDenunciasViewModel(
+        buscarDenuncias: () async => [denuncia],
+        authService: _FakeAuthService(_usuarioLogado),
+        excluirDenuncia: (d) async => excluida = d,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(home: MinhasDenunciasScreen(viewModel: viewModel)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('Excluir'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Excluir'));
+      await tester.pumpAndSettle();
+
+      expect(excluida, equals(denuncia));
+      expect(find.text('Buraco na calçada'), findsNothing);
+      expect(find.text('Denúncia excluída.'), findsOneWidget);
+    });
+  });
 }
