@@ -188,6 +188,56 @@ void main() {
     );
   });
 
+  group('DenunciaService — restrição de autoria (US 5.6/5.7)', () {
+    // Sem sessão ativa (a suíte usa a anon key, sem login), currentUser é
+    // sempre nulo — então qualquer editarDenuncia/excluirDenuncia deve ser
+    // recusado pela checagem de autoria antes de qualquer chamada de rede,
+    // independentemente de a denúncia ter dono ou não.
+    test('editarDenuncia recusa a edição sem usuário autenticado', () async {
+      final denuncia = Denuncia(
+        id: '00000000-0000-0000-0000-000000000001',
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+        autorId: 'algum-usuario',
+      );
+
+      expect(
+        () => service.editarDenuncia(denuncia),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('excluirDenuncia recusa a exclusão sem usuário autenticado', () async {
+      final denuncia = Denuncia(
+        id: '00000000-0000-0000-0000-000000000001',
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+        autorId: 'algum-usuario',
+      );
+
+      expect(
+        () => service.excluirDenuncia(denuncia),
+        throwsA(isA<Exception>()),
+      );
+    });
+
+    test('excluirDenuncia recusa mesmo quando a denúncia não tem autor_id', () async {
+      final denunciaOrfa = Denuncia(
+        id: '00000000-0000-0000-0000-000000000002',
+        titulo: 'Título',
+        descricao: 'Descrição',
+        localizacao: 'Local',
+      );
+
+      expect(
+        () => service.excluirDenuncia(denunciaOrfa),
+        throwsA(isA<Exception>()),
+      );
+    });
+  });
+
   group('DenunciaService — apoios', () {
     // Insere uma denúncia e devolve o id gerado pelo banco.
     Future<String> inserirDenuncia(String titulo) async {

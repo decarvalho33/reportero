@@ -184,6 +184,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ],
+              if (!_editando) ...[
+                const SizedBox(height: 32),
+                const Divider(),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.list_alt, color: Color(0xFF37474F)),
+                  title: const Text('Minhas denúncias'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () =>
+                      Navigator.pushNamed(context, '/minhas-denuncias'),
+                ),
+              ],
             ],
           ),
         ),
