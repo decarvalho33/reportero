@@ -113,4 +113,42 @@ class DenunciaService {
         .map((linha) => linha['denuncia_id'] as String)
         .toSet();
   }
+
+  // ==========================================
+  // FUNÇÕES ADMINISTRATIVAS (ÉPICO 6)
+  // Protegidas por RLS no Supabase. Lançarão erro se o usuário não for admin.
+  // ==========================================
+
+  /// (US 6.4) Atualiza o status de uma denúncia.
+  Future<void> atualizarStatus(String denunciaId, StatusDenuncia novoStatus) async {
+    await _supabase
+        .from('denuncias')
+        .update({'status': novoStatus.label})
+        .eq('id', denunciaId);
+  }
+
+  /// (US 6.6) Atribui um setor responsável à denúncia.
+  Future<void> atribuirSetor(String denunciaId, String setor) async {
+    await _supabase
+        .from('denuncias')
+        .update({'setor_responsavel': setor})
+        .eq('id', denunciaId);
+  }
+
+  /// (US 6.5) Salva uma resposta oficial para o usuário.
+  Future<void> responderDenuncia(String denunciaId, String resposta) async {
+    await _supabase
+        .from('denuncias')
+        .update({'resposta_admin': resposta})
+        .eq('id', denunciaId);
+  }
+
+  /// (US 6.9) Concede privilégios de administrador a outro usuário.
+  Future<void> promoverParaAdmin(String perfilId) async {
+    await _supabase
+        .from('profiles')
+        .update({'is_admin': true})
+        .eq('id', perfilId);
+  }
+
 }
