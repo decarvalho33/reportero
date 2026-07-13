@@ -94,4 +94,32 @@ void main() {
       );
     });
   });
+
+  // Análise de valor limite sobre senhaMinima (6): testa o limite e os
+  // vizinhos imediatos (5 e 7), que separam >= 6 de > 6 e de == 6,
+  // além do extremo vazio.
+  group('senhaValida', () {
+    test('rejeita senha com 5 caracteres (logo abaixo do limite)', () {
+      expect(AuthService.senhaValida('12345'), isFalse);
+    });
+
+    test('aceita senha com exatamente 6 caracteres (limite)', () {
+      expect(AuthService.senhaValida('123456'), isTrue);
+    });
+
+    test('aceita senha com 7 caracteres (logo acima do limite)', () {
+      expect(AuthService.senhaValida('1234567'), isTrue);
+    });
+
+    test('rejeita senha vazia', () {
+      expect(AuthService.senhaValida(''), isFalse);
+    });
+
+    test('atualizarSenha rejeita senha abaixo do limite', () async {
+      await expectLater(
+        AuthService().atualizarSenha('12345'),
+        throwsArgumentError,
+      );
+    });
+  });
 }
