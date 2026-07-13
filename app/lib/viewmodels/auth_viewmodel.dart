@@ -14,6 +14,7 @@ class AuthViewModel extends ChangeNotifier {
   String? get erro => _erro;
   bool get estaLogado => _auth.estaLogado;
   String? get nomeUsuario => _auth.nomeUsuario;
+  String? get emailUsuario => _auth.usuarioAtual?.email;
   Stream<AuthState> get mudancasDeSessao => _auth.mudancasDeSessao;
 
   Future<bool> entrar(String email, String senha) async {
