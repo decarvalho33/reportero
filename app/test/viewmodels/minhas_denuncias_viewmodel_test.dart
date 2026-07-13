@@ -82,4 +82,80 @@ void main() {
       expect(deslogado.estaLogado, isFalse);
     });
   });
+
+  group('filtros', () {
+    final infra = Denuncia(
+      id: '1',
+      titulo: 'Buraco na calçada',
+      descricao: 'Calçada danificada',
+      localizacao: 'IC-3',
+      categoria: Categoria.infraestrutura,
+      status: 'Aberta',
+    );
+    final seguranca = Denuncia(
+      id: '2',
+      titulo: 'Porta arrombada',
+      descricao: 'Porta do banheiro foi arrombada',
+      localizacao: 'CB',
+      categoria: Categoria.seguranca,
+      status: 'Resolvida',
+    );
+
+    late MinhasDenunciasViewModel viewModel;
+
+    setUp(() {
+      viewModel = MinhasDenunciasViewModel(
+        authService: _FakeAuthService(_usuarioLogado),
+      );
+      viewModel.carregarDenunciasLocais([infra, seguranca]);
+    });
+
+    test('filtrarPorTexto restringe às denúncias que combinam', () {
+      viewModel.filtrarPorTexto('porta');
+
+      expect(viewModel.denuncias, equals([seguranca]));
+    });
+
+    test('filtrarPorCategoria restringe à categoria selecionada', () {
+      viewModel.filtrarPorCategoria(Categoria.infraestrutura);
+
+      expect(viewModel.denuncias, equals([infra]));
+    });
+
+    test('filtrarPorStatus restringe ao status selecionado', () {
+      viewModel.filtrarPorStatus('Resolvida');
+
+      expect(viewModel.denuncias, equals([seguranca]));
+    });
+
+    test('filtros combinados (texto + categoria + status) funcionam juntos', () {
+      viewModel.filtrarPorCategoria(Categoria.infraestrutura);
+      viewModel.filtrarPorStatus('Aberta');
+      viewModel.filtrarPorTexto('buraco');
+
+      expect(viewModel.denuncias, equals([infra]));
+    });
+
+    test('filtro nulo (categoria ou status) volta a exibir todas', () {
+      viewModel.filtrarPorCategoria(Categoria.seguranca);
+      viewModel.filtrarPorCategoria(null);
+
+      expect(viewModel.denuncias.length, equals(2));
+    });
+
+    test('statusDisponiveis reflete os status distintos presentes na lista', () {
+      expect(viewModel.statusDisponiveis, equals(['Aberta', 'Resolvida']));
+    });
+
+    test('temDenunciasCadastradas é true quando há denúncias carregadas', () {
+      expect(viewModel.temDenunciasCadastradas, isTrue);
+    });
+
+    test('temDenunciasCadastradas é false antes de qualquer carregamento', () {
+      final vazio = MinhasDenunciasViewModel(
+        authService: _FakeAuthService(_usuarioLogado),
+      );
+      expect(vazio.temDenunciasCadastradas, isFalse);
+    });
+  });
 }

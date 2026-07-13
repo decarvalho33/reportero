@@ -20,6 +20,7 @@ class MinhasDenunciasScreen extends StatefulWidget {
 class _MinhasDenunciasScreenState extends State<MinhasDenunciasScreen> {
   late final MinhasDenunciasViewModel _viewModel =
       widget._viewModelInjetado ?? MinhasDenunciasViewModel();
+  final _buscaCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -38,6 +39,7 @@ class _MinhasDenunciasScreenState extends State<MinhasDenunciasScreen> {
   void dispose() {
     _viewModel.removeListener(_onViewModelChanged);
     _viewModel.dispose();
+    _buscaCtrl.dispose();
     super.dispose();
   }
 
@@ -54,7 +56,109 @@ class _MinhasDenunciasScreenState extends State<MinhasDenunciasScreen> {
         backgroundColor: const Color(0xFF37474F),
         foregroundColor: Colors.white,
       ),
-      body: _buildBody(),
+      body: Column(
+        children: [
+          if (_viewModel.temDenunciasCadastradas) _buildFiltros(),
+          Expanded(child: _buildBody()),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFiltros() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _buscaCtrl,
+            onChanged: _viewModel.filtrarPorTexto,
+            decoration: InputDecoration(
+              hintText: 'Buscar nas minhas denúncias...',
+              prefixIcon: const Icon(Icons.search),
+              isDense: true,
+              filled: true,
+              fillColor: const Color(0xFFF5F5F5),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildFiltroChip(
+                  'Todas',
+                  selecionado: _viewModel.filtroCategoria == null,
+                  onSelected: () => _viewModel.filtrarPorCategoria(null),
+                ),
+                ...Categoria.values.map(
+                  (c) => _buildFiltroChip(
+                    c.label,
+                    selecionado: _viewModel.filtroCategoria == c,
+                    onSelected: () => _viewModel.filtrarPorCategoria(
+                      _viewModel.filtroCategoria == c ? null : c,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_viewModel.statusDisponiveis.length > 1) ...[
+            const SizedBox(height: 8),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildFiltroChip(
+                    'Todos os status',
+                    selecionado: _viewModel.filtroStatus == null,
+                    onSelected: () => _viewModel.filtrarPorStatus(null),
+                  ),
+                  ..._viewModel.statusDisponiveis.map(
+                    (s) => _buildFiltroChip(
+                      s,
+                      selecionado: _viewModel.filtroStatus == s,
+                      onSelected: () => _viewModel.filtrarPorStatus(
+                        _viewModel.filtroStatus == s ? null : s,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFiltroChip(
+    String label, {
+    required bool selecionado,
+    required VoidCallback onSelected,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: selecionado,
+        onSelected: (_) => onSelected(),
+        selectedColor: const Color(0xFF37474F),
+        backgroundColor: Colors.white,
+        side: BorderSide(color: Colors.blueGrey[200]!),
+        labelStyle: TextStyle(
+          color: selecionado ? Colors.white : const Color(0xFF37474F),
+          fontWeight: FontWeight.w500,
+          fontSize: 13,
+        ),
+        showCheckmark: false,
+      ),
     );
   }
 
@@ -79,7 +183,9 @@ class _MinhasDenunciasScreenState extends State<MinhasDenunciasScreen> {
               Icon(Icons.inbox_outlined, color: Colors.grey[400], size: 48),
               const SizedBox(height: 12),
               Text(
-                'Você ainda não registrou nenhuma denúncia.',
+                _viewModel.temDenunciasCadastradas
+                    ? 'Nenhuma denúncia encontrada com os filtros aplicados.'
+                    : 'Você ainda não registrou nenhuma denúncia.',
                 style: TextStyle(color: Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),

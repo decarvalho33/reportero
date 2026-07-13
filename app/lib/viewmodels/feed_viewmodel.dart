@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/denuncia.dart';
 import '../services/denuncia_service.dart';
+import '../utils/filtro_denuncias.dart';
 
 enum TipoOrdenacao {
   recente,
@@ -102,15 +103,11 @@ class FeedViewModel extends ChangeNotifier {
   }
 
   void _aplicarFiltrosEOrdenacao() {
-    _denunciasFiltradas = _allDenuncias.where((d) {
-      final passaTexto = _filtroTexto.isEmpty ||
-          d.titulo.toLowerCase().contains(_filtroTexto) ||
-          d.descricao.toLowerCase().contains(_filtroTexto) ||
-          d.localizacao.toLowerCase().contains(_filtroTexto);
-      final passaCategoria =
-          _filtroCategoria == null || d.categoria == _filtroCategoria;
-      return passaTexto && passaCategoria;
-    }).toList();
+    _denunciasFiltradas = FiltroDenuncias.aplicar(
+      _allDenuncias,
+      texto: _filtroTexto,
+      categoria: _filtroCategoria,
+    );
 
     switch (_tipoOrdenacao) {
       case TipoOrdenacao.recente:

@@ -47,7 +47,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Buraco na calçada'), findsOneWidget);
-    expect(find.text('Infraestrutura'), findsOneWidget);
+    // "Infraestrutura" também aparece como chip de filtro de categoria, além
+    // do chip no resumo da denúncia — por isso findsWidgets, não findsOneWidget.
+    expect(find.text('Infraestrutura'), findsWidgets);
     expect(find.text('Em andamento'), findsOneWidget);
     expect(find.text('10/03/2024'), findsOneWidget);
   });
@@ -88,5 +90,81 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Tela de login'), findsOneWidget);
+  });
+
+  group('busca e filtros', () {
+    final infra = Denuncia(
+      id: '1',
+      titulo: 'Buraco na calçada',
+      descricao: 'Calçada danificada',
+      localizacao: 'IC-3',
+      categoria: Categoria.infraestrutura,
+      status: 'Aberta',
+    );
+    final seguranca = Denuncia(
+      id: '2',
+      titulo: 'Porta arrombada',
+      descricao: 'Porta do banheiro foi arrombada',
+      localizacao: 'CB',
+      categoria: Categoria.seguranca,
+      status: 'Resolvida',
+    );
+
+    Future<MinhasDenunciasViewModel> montarTela(WidgetTester tester) async {
+      final viewModel = MinhasDenunciasViewModel(
+        buscarDenuncias: () async => [infra, seguranca],
+        authService: _FakeAuthService(_usuarioLogado),
+      );
+      await tester.pumpWidget(
+        MaterialApp(home: MinhasDenunciasScreen(viewModel: viewModel)),
+      );
+      await tester.pumpAndSettle();
+      return viewModel;
+    }
+
+    testWidgets('busca por texto restringe a lista exibida', (tester) async {
+      await montarTela(tester);
+
+      await tester.enterText(find.byType(TextField), 'porta');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Porta arrombada'), findsOneWidget);
+      expect(find.text('Buraco na calçada'), findsNothing);
+    });
+
+    testWidgets('filtro por categoria restringe a lista exibida', (tester) async {
+      await montarTela(tester);
+
+      await tester.tap(find.widgetWithText(ChoiceChip, 'Segurança'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Porta arrombada'), findsOneWidget);
+      expect(find.text('Buraco na calçada'), findsNothing);
+    });
+
+    testWidgets('filtro por status restringe a lista exibida', (tester) async {
+      await montarTela(tester);
+
+      await tester.tap(find.widgetWithText(ChoiceChip, 'Resolvida'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Porta arrombada'), findsOneWidget);
+      expect(find.text('Buraco na calçada'), findsNothing);
+    });
+
+    testWidgets(
+      'exibe mensagem específica quando os filtros não encontram nada',
+      (tester) async {
+        await montarTela(tester);
+
+        await tester.enterText(find.byType(TextField), 'inexistente');
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Nenhuma denúncia encontrada com os filtros aplicados.'),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }
