@@ -21,9 +21,9 @@ class _FeedScreenState extends State<FeedScreen> {
   /// Se não estiver, envia para a tela de login.
   void _redirecionarParaAutenticados(String rota) {
     if (!_authViewModel.estaLogado) {
-      Navigator.pushNamed(context, '/login');
+      Navigator.pushNamed(context, '/login').then((_) => _viewModel.carregarDenuncias());
     } else {
-      Navigator.pushNamed(context, rota);
+      Navigator.pushNamed(context, rota).then((_) => _viewModel.carregarDenuncias());
     }
   }
 

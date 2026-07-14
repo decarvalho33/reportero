@@ -67,49 +67,84 @@ class DenunciaCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
 
-            // Localização: indicador tocável que abre o mapa
-            InkWell(
-              onTap: () => _mostrarOpcoesMapa(context),
-              borderRadius: BorderRadius.circular(6),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.location_on, size: 16, color: Colors.blueGrey[500]),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            denuncia.localizacao,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.blueGrey[700],
-                              fontWeight: FontWeight.w500,
+            if (denuncia.latitude != null && denuncia.longitude != null)
+              InkWell(
+                onTap: () => _mostrarOpcoesMapa(context),
+                borderRadius: BorderRadius.circular(6),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 3),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 16,
+                            color: Colors.blueGrey[500],
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              denuncia.localizacao,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.blueGrey[700],
+                                fontWeight: FontWeight.w500,
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.open_in_new,
+                            size: 13,
+                            color: Colors.blueGrey[400],
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 20, top: 1),
+                        child: Text(
+                          'Toque para abrir no mapa',
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            color: Colors.blueGrey[400],
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.open_in_new, size: 13, color: Colors.blueGrey[400]),
-                      ],
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.location_on,
+                      size: 16,
+                      color: Colors.blueGrey[500],
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 20, top: 1),
+                    const SizedBox(width: 4),
+                    Expanded(
                       child: Text(
-                        'Toque para abrir no mapa',
+                        denuncia.localizacao.isNotEmpty
+                            ? denuncia.localizacao
+                            : 'Coordenadas de GPS não informadas',
                         style: TextStyle(
-                          fontSize: 10.5,
-                          color: Colors.blueGrey[400],
+                          fontSize: 13,
+                          color: Colors.blueGrey[700],
                           fontWeight: FontWeight.w500,
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
 
             const SizedBox(height: 6),
 
@@ -129,13 +164,18 @@ class DenunciaCard extends StatelessWidget {
                   ),
                   textStyle: const TextStyle(color: Colors.white, fontSize: 12),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF37474F),
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF37474F).withValues(alpha: 0.25),
+                          color: const Color(
+                            0xFF37474F,
+                          ).withValues(alpha: 0.25),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -191,9 +231,19 @@ class DenunciaCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.broken_image_outlined, color: Colors.grey[400], size: 18),
+                          Icon(
+                            Icons.broken_image_outlined,
+                            color: Colors.grey[400],
+                            size: 18,
+                          ),
                           const SizedBox(width: 6),
-                          Text('Erro ao carregar mídia', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                          Text(
+                            'Erro ao carregar mídia',
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 12,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -208,7 +258,11 @@ class DenunciaCard extends StatelessWidget {
               denuncia.descricao,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 14, color: Colors.grey[700], height: 1.4),
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[700],
+                height: 1.4,
+              ),
             ),
 
             const SizedBox(height: 12),
@@ -220,7 +274,9 @@ class DenunciaCard extends StatelessWidget {
                 IconButton(
                   onPressed: onApoiar,
                   icon: Icon(
-                    denuncia.jaApoiei ? Icons.thumb_up : Icons.thumb_up_outlined,
+                    denuncia.jaApoiei
+                        ? Icons.thumb_up
+                        : Icons.thumb_up_outlined,
                     color: denuncia.jaApoiei ? Colors.blue : Colors.grey,
                   ),
                 ),
@@ -245,8 +301,8 @@ class DenunciaCard extends StatelessWidget {
   }
 
   Uri get _googleMapsUri => Uri.parse(
-        'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(_consultaMapa)}',
-      );
+    'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(_consultaMapa)}',
+  );
 
   Uri get _appleMapsUri {
     if (denuncia.latitude != null && denuncia.longitude != null) {
@@ -288,7 +344,10 @@ class DenunciaCard extends StatelessWidget {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.map_outlined, color: Color(0xFF37474F)),
+                leading: const Icon(
+                  Icons.map_outlined,
+                  color: Color(0xFF37474F),
+                ),
                 title: const Text('Apple Maps'),
                 onTap: () {
                   Navigator.pop(sheetContext);
