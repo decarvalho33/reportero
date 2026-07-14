@@ -91,6 +91,28 @@ class AuthViewModel extends ChangeNotifier {
     }
   }
 
+  Future<bool> trocarSenha({
+    required String senhaAtual,
+    required String novaSenha,
+  }) async {
+    _isLoading = true;
+    _erro = null;
+    notifyListeners();
+    try {
+      await _auth.trocarSenha(senhaAtual: senhaAtual, novaSenha: novaSenha);
+      return true;
+    } catch (e) {
+      _erro = e
+          .toString()
+          .replaceFirst('Exception: ', '')
+          .replaceFirst('Invalid argument(s): ', '');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<void> sair() async {
     await _auth.sair();
     notifyListeners();
