@@ -1,8 +1,8 @@
-import 'dart:html' as html;
-
 import 'package:csv/csv.dart';
 
 import '../models/denuncia.dart';
+import 'export/csv_exporter_stub.dart'
+    if (dart.library.html) 'export/csv_exporter_web.dart' as csv_exporter;
 
 class ExportService {
 
@@ -40,15 +40,7 @@ class ExportService {
 
     final csv = const ListToCsvConverter().convert(linhas);
 
-    final bytes = html.Blob([csv]);
-
-    final url = html.Url.createObjectUrlFromBlob(bytes);
-
-    final anchor = html.AnchorElement(href: url)
-      ..download = 'relatorio_denuncias.csv'
-      ..click();
-
-    html.Url.revokeObjectUrl(url);
+    csv_exporter.baixarCsv(csv, 'relatorio_denuncias.csv');
 
   }
 

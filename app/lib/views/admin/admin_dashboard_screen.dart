@@ -111,15 +111,21 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             tooltip: "Exportar CSV",
             onPressed: () {
 
-              _exportService.exportarCSV(
-                _viewModel.denuncias,
-              );
+              try {
+                _exportService.exportarCSV(
+                  _viewModel.denuncias,
+                );
 
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Relatório exportado com sucesso."),
-                ),
-              );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Relatório exportado com sucesso."),
+                  ),
+                );
+              } on UnsupportedError catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(e.message ?? "Exportação não suportada nesta plataforma.")),
+                );
+              }
 
             }
           ),

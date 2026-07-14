@@ -252,16 +252,15 @@ class _AdminDetailScreenState extends State<AdminDetailScreen> {
                         );
                       });
 
-                      Navigator.pop(context, denuncia);
-                      Navigator.pop(this.context);
+                      Navigator.pop(context);
 
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      ScaffoldMessenger.of(this.context).showSnackBar(
                         const SnackBar(
                           content: Text("Status atualizado com sucesso."),
                         ),
                       );
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      ScaffoldMessenger.of(this.context).showSnackBar(
                         SnackBar(
                           content: Text(
                             _viewModel.erro ?? "Erro ao atualizar status.",
