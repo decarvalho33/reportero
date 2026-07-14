@@ -228,13 +228,16 @@ class DenunciaService {
 
   /// (US 6.9) Lista todos los usuários cadastrados.
   Future<List<Map<String, dynamic>>> listarPerfis() async {
-    final response = await _supabase
-        .from('profiles')
-        .select('id, nome, is_admin')
-        .order('nome');
+  final response = await _supabase
+      .from('profiles')
+      .select('id, nome, is_admin')
+      .order('nome');
 
-    return List<Map<String, dynamic>>.from(response);
-  }
+  print("Perfis recebidos: ${response.length}");
+  print(response.toString());
+
+  return List<Map<String, dynamic>>.from(response);
+}
 
   /// (US 6.9) Revoga privilégios de administrador.
   Future<void> removerAdmin(String perfilId) async {

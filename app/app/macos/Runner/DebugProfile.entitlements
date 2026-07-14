@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>com.apple.security.app-sandbox</key>
+	<true/>
+	
+	<!-- Permite que la App use Internet (Para conectar con Supabase) -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+	
+	<!-- Permite que la App cree un Socket Local (Para el Hot Reload de Flutter) -->
+	<key>com.apple.security.network.server</key>
+	<true/>
+	
+	<!-- Permite que la App abra la ventana nativa de selección de archivos/fotos -->
+	<key>com.apple.security.files.user-selected.read-only</key>
+	<true/>
+</dict>
+</plist>

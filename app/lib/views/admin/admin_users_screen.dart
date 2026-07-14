@@ -81,36 +81,44 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   ),
                 ),
                 title: Text(usuario["nome"] ?? "Sem nome"),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(usuario["email"] ?? ""),
-                    const SizedBox(height: 4),
-                    Text(
-                      isAdmin ? "Administrador" : "Usuário",
-                      style: TextStyle(
-                        color: isAdmin ? Colors.green : Colors.grey,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                
+                subtitle: Text(
+                  isAdmin ? "Administrador" : "Usuário",
+                  style: TextStyle(
+                    color: isAdmin ? Colors.green : Colors.grey,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                
                 trailing: ElevatedButton(
                   onPressed: () async {
-                    await _viewModel.alterarPermissao(usuario);
+                    final sucesso = await _viewModel.alterarPermissao(
+                      usuario["id"],
+                      !isAdmin,
+                    );
 
                     if (!mounted) return;
 
+                  if (sucesso) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
                           isAdmin
-                              ? "Administrador removido."
-                              : "Administrador promovido.",
+                            ? "Administrador removido."
+                            : "Administrador promovido.",
                         ),
                       ),
                     );
-                  },
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          _viewModel.erro ?? "Erro ao alterar permissões.",
+                        ),
+                      ),
+                    );
+                  }
+                },
                   child: Text(
                     isAdmin ? "Remover" : "Promover",
                   ),

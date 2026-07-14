@@ -99,6 +99,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         actions: [
 
           IconButton(
+            icon: const Icon(Icons.manage_accounts),
+            tooltip: "Gerenciar administradores",
+            onPressed: () {
+              Navigator.pushNamed(context, "/admin/users");
+            },
+          ),
+
+          IconButton(
             icon: const Icon(Icons.download),
             tooltip: "Exportar CSV",
             onPressed: () {

@@ -4,37 +4,50 @@ import '../services/denuncia_service.dart';
 class AdminUsersViewModel extends ChangeNotifier {
   final DenunciaService _service = DenunciaService();
 
-  List<Map<String, dynamic>> usuarios = [];
+  List<Map<String, dynamic>> _usuarios = [];
 
-  bool isLoading = false;
-  String? erro;
+  bool _isLoading = false;
+  String? _erro;
+
+  List<Map<String, dynamic>> get usuarios => _usuarios;
+
+  bool get isLoading => _isLoading;
+
+  String? get erro => _erro;
 
   Future<void> carregarUsuarios() async {
-    isLoading = true;
-    erro = null;
+    _isLoading = true;
+    _erro = null;
     notifyListeners();
 
     try {
-      usuarios = await _service.listarPerfis();
+      _usuarios = await _service.listarPerfis();
     } catch (e) {
-      erro = e.toString();
+      _erro = "Erro ao carregar usuários.";
     }
 
-    isLoading = false;
+    _isLoading = false;
     notifyListeners();
   }
 
-  Future<void> alterarPermissao(
-    Map<String, dynamic> usuario,
+  Future<bool> alterarPermissao(
+    String id,
+    bool tornarAdmin,
   ) async {
-    final bool admin = usuario["is_admin"] == true;
+    try {
+      if (tornarAdmin) {
+        await _service.promoverParaAdmin(id);
+      } else {
+        await _service.removerAdmin(id);
+      }
 
-    if (admin) {
-      await _service.removerAdmin(usuario["id"]);
-    } else {
-      await _service.promoverParaAdmin(usuario["id"]);
+      await carregarUsuarios();
+
+      return true;
+    } catch (e) {
+      _erro = "Erro ao alterar permissões.";
+      notifyListeners();
+      return false;
     }
-
-    await carregarUsuarios();
   }
 }
