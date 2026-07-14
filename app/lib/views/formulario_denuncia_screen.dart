@@ -180,26 +180,7 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                           ),
                         ),
 
-                        Card(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          elevation: 1,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                          child: SwitchListTile(
-                            title: const Text('Anexar Coordenadas GPS', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                            subtitle: Text(
-                              viewModel.latitude != null
-                                  ? 'Lat: ${viewModel.latitude}, Lon: ${viewModel.longitude}'
-                                  : 'Inserir localização exata via mapa/satélite',
-                              style: TextStyle(
-                                color: viewModel.latitude != null ? Colors.green[700] : Colors.grey[600],
-                                fontSize: 12,
-                              ),
-                            ),
-                            value: viewModel.latitude != null,
-                            activeColor: const Color(0xFF2E7D32),
-                            onChanged: viewModel.alternarLocalizacaoGps,
-                          ),
-                        ),
+                        _buildGpsCard(),
 
                         Card(
                           margin: const EdgeInsets.only(bottom: 16),
@@ -310,6 +291,27 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
             borderSide: BorderSide(color: Colors.grey[300]!),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildGpsCard() {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 1,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      child: SwitchListTile(
+        title: const Text('Anexar Coordenadas GPS', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        subtitle: Text(
+          viewModel.coordenadasFormatadas,
+          style: TextStyle(
+            color: viewModel.latitude != null ? Colors.green[700] : Colors.grey[600],
+            fontSize: 12,
+          ),
+        ),
+        value: viewModel.latitude != null,
+        activeColor: const Color(0xFF2E7D32),
+        onChanged: viewModel.alternarLocalizacaoGps,
       ),
     );
   }
