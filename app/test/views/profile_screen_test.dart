@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -16,11 +17,16 @@ class _FakeAuthService extends AuthService {
   User? get usuarioAtual => _usuario;
 }
 
-/// Substitui o acesso à tabela `profiles`, guardando o nome em memória.
+/// Substitui o acesso à tabela `profiles`, guardando o nome e a foto em
+/// memória.
 class _FakePerfilService extends PerfilService {
-  _FakePerfilService({String? nomeInicial}) : _nome = nomeInicial;
+  _FakePerfilService({String? nomeInicial, String? fotoUrlInicial})
+      : _nome = nomeInicial,
+        _fotoUrl = fotoUrlInicial;
   String? _nome;
+  String? _fotoUrl;
   String? ultimoNomeSalvo;
+  String? ultimaFotoSalva;
 
   @override
   Future<String?> obterNome(String userId) async => _nome;
@@ -37,6 +43,26 @@ class _FakePerfilService extends PerfilService {
     }
     _nome = nome.trim();
     ultimoNomeSalvo = _nome;
+  }
+
+  @override
+  Future<String?> obterFotoPerfil(String userId) async => _fotoUrl;
+
+  @override
+  Future<String?> subirFotoPerfil(Uint8List fotoBytes, String nomeArquivo) async {
+    if (!PerfilService.fotoValida(nomeArquivo)) {
+      throw ArgumentError('Formato de imagem não suportado. Use JPG, PNG ou WEBP.');
+    }
+    return 'https://example.com/perfil/$nomeArquivo';
+  }
+
+  @override
+  Future<void> atualizarFotoPerfil({
+    required String userId,
+    required String fotoUrl,
+  }) async {
+    _fotoUrl = fotoUrl;
+    ultimaFotoSalva = fotoUrl;
   }
 }
 
@@ -136,5 +162,48 @@ void main() {
       findsOneWidget,
     );
     expect(perfilService.ultimoNomeSalvo, isNull);
+  });
+
+  testWidgets('exibe o ícone de placeholder quando não há foto de perfil', (
+    tester,
+  ) async {
+    final viewModel = PerfilViewModel(
+      authService: _FakeAuthService(_usuarioLogado),
+      perfilService: _FakePerfilService(nomeInicial: 'Maria Teste'),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(home: ProfileScreen(viewModel: viewModel)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(Icons.person), findsOneWidget);
+    final avatar = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
+    expect(avatar.backgroundImage, isNull);
+  });
+
+  testWidgets('exibe a foto de perfil quando há URL salva', (tester) async {
+    final viewModel = PerfilViewModel(
+      authService: _FakeAuthService(_usuarioLogado),
+      perfilService: _FakePerfilService(
+        nomeInicial: 'Maria Teste',
+        fotoUrlInicial: 'https://example.com/perfil/foto.jpg',
+      ),
+    );
+
+    // Evita pumpAndSettle: a foto real via NetworkImage tentaria uma
+    // requisição de rede, que não resolve no ambiente de teste.
+    await tester.pumpWidget(
+      MaterialApp(home: ProfileScreen(viewModel: viewModel)),
+    );
+    await tester.pump();
+
+    expect(find.byIcon(Icons.person), findsNothing);
+    final avatar = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
+    expect(avatar.backgroundImage, isA<NetworkImage>());
+    expect(
+      (avatar.backgroundImage as NetworkImage).url,
+      equals('https://example.com/perfil/foto.jpg'),
+    );
   });
 }

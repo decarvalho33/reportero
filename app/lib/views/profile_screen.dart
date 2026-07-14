@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../services/perfil_service.dart';
 import '../viewmodels/perfil_viewmodel.dart';
 
@@ -23,6 +24,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       widget._viewModelInjetado ?? PerfilViewModel();
   final _formKey = GlobalKey<FormState>();
   final _nomeCtrl = TextEditingController();
+  final _picker = ImagePicker();
   bool _editando = false;
 
   @override
@@ -80,6 +82,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _selecionarFotoPerfil() async {
+    try {
+      final XFile? imagem = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+      if (imagem == null) return;
+
+      final bytes = await imagem.readAsBytes();
+      final sucesso = await _viewModel.atualizarFotoPerfil(bytes, imagem.name);
+      if (!mounted) return;
+
+      if (sucesso) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Foto de perfil atualizada com sucesso.')),
+        );
+      } else if (_viewModel.erro != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_viewModel.erro!),
+            backgroundColor: Colors.redAccent,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Não foi possível selecionar a foto: $e'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,10 +138,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const CircleAvatar(
-                radius: 40,
-                backgroundColor: Color(0xFF37474F),
-                child: Icon(Icons.person, color: Colors.white, size: 40),
+              Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 40,
+                    backgroundColor: const Color(0xFF37474F),
+                    backgroundImage: _viewModel.fotoUrl != null
+                        ? NetworkImage(_viewModel.fotoUrl!)
+                        : null,
+                    child: _viewModel.fotoUrl == null
+                        ? const Icon(Icons.person, color: Colors.white, size: 40)
+                        : null,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: GestureDetector(
+                      onTap: _viewModel.isLoading ? null : _selecionarFotoPerfil,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF2E7D32),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.camera_alt, color: Colors.white, size: 16),
+                      ),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
               const Text(
