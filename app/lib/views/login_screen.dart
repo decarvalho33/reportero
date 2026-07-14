@@ -42,7 +42,11 @@ class _LoginScreenState extends State<LoginScreen> {
       FocusScope.of(context).unfocus();
       final sucesso = await _viewModel.entrar(_emailCtrl.text, _senhaCtrl.text);
       if (sucesso && mounted) {
-        Navigator.pop(context);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/feed',
+          (route) => false,
+        );          
       } else if (_viewModel.erro != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
