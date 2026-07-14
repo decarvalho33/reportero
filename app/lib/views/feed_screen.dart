@@ -16,6 +16,7 @@ class _FeedScreenState extends State<FeedScreen> {
   final _authViewModel = AuthViewModel();
   final _scrollController = ScrollController();
   bool _isScrolled = false;
+  bool _isAdmin = false;
 
   /// Verifica se o usuário está logado. Se estiver, redireciona para a rota desejada.
   /// Se não estiver, envia para a tela de login.
@@ -27,11 +28,19 @@ class _FeedScreenState extends State<FeedScreen> {
     }
   }
 
+  Future<void> _verificarAdmin() async {
+    _isAdmin = await _viewModel.service.verificarPrivilegioAdmin();
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _viewModel.addListener(() => setState(() {}));
     _viewModel.carregarDenuncias();
+    _verificarAdmin();
     _scrollController.addListener(() {
       final isScrolled = _scrollController.offset > 80;
       if (_isScrolled != isScrolled) {
@@ -145,6 +154,7 @@ class _FeedScreenState extends State<FeedScreen> {
                                     onPressed: () async {
                                       Navigator.pop(context);
                                       await _authViewModel.sair();
+                                      await _verificarAdmin();
                                       if (context.mounted) {
                                         ScaffoldMessenger.of(
                                           context,
@@ -190,6 +200,20 @@ class _FeedScreenState extends State<FeedScreen> {
                   ),
                 ],
               ),
+              
+              if (_authViewModel.estaLogado && _isAdmin)
+                IconButton(
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(
+                    Icons.admin_panel_settings,
+                    color: Colors.white,
+                  ),
+                  tooltip: 'Painel Administrativo',
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/admin');
+                  },
+                ),
+              
               IconButton(
                 visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.add_circle_outline, color: Colors.white),

@@ -11,6 +11,8 @@ enum TipoOrdenacao {
 class FeedViewModel extends ChangeNotifier {
   final _service = DenunciaService();
 
+  DenunciaService get service => _service;
+
   List<Denuncia> _allDenuncias = [];
   List<Denuncia> _denunciasFiltradas = [];
 
