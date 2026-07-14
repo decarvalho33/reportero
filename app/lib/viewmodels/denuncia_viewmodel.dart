@@ -49,6 +49,13 @@ class DenunciaViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   Categoria get categoriaSelecionada => _categoriaSelecionada;
 
+  String get coordenadasFormatadas {
+    if (_latitude != null && _longitude != null) {
+      return 'Lat: $_latitude, Lon: $_longitude';
+    }
+    return 'Inserir localização exata via mapa/satélite';
+  }
+
   void definirCategoria(Categoria novaCategoria) {
     _categoriaSelecionada = novaCategoria;
     notifyListeners();
@@ -113,33 +120,9 @@ class DenunciaViewModel extends ChangeNotifier {
       }
 
       if (emEdicao) {
-        final original = _denunciaOriginal!;
-        final atualizada = Denuncia(
-          id: original.id,
-          titulo: tituloCtrl.text,
-          localizacao: localCtrl.text,
-          descricao: descCtrl.text,
-          autor: autorCtrl.text.isEmpty ? "Anônimo" : autorCtrl.text,
-          autorId: original.autorId,
-          categoria: _categoriaSelecionada,
-          latitude: _latitude,
-          longitude: _longitude,
-          fotoUrl: urlFoto,
-          status: original.status,
-        );
-        await _service.editarDenuncia(atualizada);
+        await _service.editarDenuncia(_montarDenuncia(urlFoto));
       } else {
-        final novaDenuncia = Denuncia(
-          titulo: tituloCtrl.text,
-          localizacao: localCtrl.text,
-          descricao: descCtrl.text,
-          autor: autorCtrl.text.isEmpty ? "Anônimo" : autorCtrl.text,
-          categoria: _categoriaSelecionada,
-          latitude: _latitude,
-          longitude: _longitude,
-          fotoUrl: urlFoto,
-        );
-        await _service.enviarDenuncia(novaDenuncia);
+        await _service.enviarDenuncia(_montarDenuncia(urlFoto));
       }
 
       _isLoading = false;
@@ -164,5 +147,21 @@ class DenunciaViewModel extends ChangeNotifier {
     _longitude = null;
     _categoriaSelecionada = Categoria.outros;
     notifyListeners();
+  }
+
+  Denuncia _montarDenuncia(String? urlFoto) {
+    return Denuncia(
+      id: _denunciaOriginal?.id,
+      titulo: tituloCtrl.text,
+      localizacao: localCtrl.text,
+      descricao: descCtrl.text,
+      autor: autorCtrl.text.isEmpty ? "Anônimo" : autorCtrl.text,
+      autorId: _denunciaOriginal?.autorId,
+      categoria: _categoriaSelecionada,
+      latitude: _latitude,
+      longitude: _longitude,
+      fotoUrl: urlFoto,
+      status: _denunciaOriginal?.status ?? StatusDenuncia.pendente,
+    );
   }
 }
