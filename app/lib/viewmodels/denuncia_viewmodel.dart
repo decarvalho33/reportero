@@ -2,14 +2,37 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../models/denuncia.dart';
 import '../services/denuncia_service.dart';
+import 'package:geolocator/geolocator.dart';
 
 class DenunciaViewModel extends ChangeNotifier {
+  /// Sem [denunciaExistente], o formulário funciona no modo de criação
+  /// (US 4.x/Épico 3). Com ela, entra em modo de edição (US 5.6/5.7): os
+  /// campos são pré-preenchidos e o envio atualiza a denúncia em vez de
+  /// criar uma nova.
+  DenunciaViewModel({Denuncia? denunciaExistente})
+      : _denunciaOriginal = denunciaExistente {
+    if (denunciaExistente != null) {
+      tituloCtrl.text = denunciaExistente.titulo;
+      localCtrl.text = denunciaExistente.localizacao;
+      descCtrl.text = denunciaExistente.descricao;
+      autorCtrl.text =
+          denunciaExistente.autor == 'Anônimo' ? '' : denunciaExistente.autor;
+      _categoriaSelecionada = denunciaExistente.categoria;
+      _latitude = denunciaExistente.latitude;
+      _longitude = denunciaExistente.longitude;
+      _fotoUrlExistente = denunciaExistente.fotoUrl;
+    }
+  }
+
   final formKey = GlobalKey<FormState>();
   final _service = DenunciaService();
   final tituloCtrl = TextEditingController();
   final localCtrl = TextEditingController();
   final descCtrl = TextEditingController();
   final autorCtrl = TextEditingController();
+
+  final Denuncia? _denunciaOriginal;
+  String? _fotoUrlExistente;
 
   Uint8List? _fotoBytes;
   String? _nomeArquivoFoto;
@@ -18,6 +41,8 @@ class DenunciaViewModel extends ChangeNotifier {
   bool _isLoading = false;
   Categoria _categoriaSelecionada = Categoria.outros;
 
+  bool get emEdicao => _denunciaOriginal != null;
+  String? get fotoUrlExistente => _fotoUrlExistente;
   Uint8List? get fotoBytes => _fotoBytes;
   double? get latitude => _latitude;
   double? get longitude => _longitude;
@@ -35,10 +60,34 @@ class DenunciaViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  void alternarLocalizacaoGps(bool ativar) {
+  /// Habilita ou desabilita o uso da localização por GPS.
+  /// Quando ativado, solicita permissão ao usuário (caso necessário) e busca 
+  /// a coordenada atual (latitude e longitude) do dispositivo via pacote geolocator.
+  Future<void> alternarLocalizacaoGps(bool ativar) async {
     if (ativar) {
-      _latitude = -22.8184;
-      _longitude = -47.0647;
+      try {
+        LocationPermission permission = await Geolocator.checkPermission();
+        if (permission == LocationPermission.denied) {
+          permission = await Geolocator.requestPermission();
+        }
+
+        if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+          Position posicao = await Geolocator.getCurrentPosition(
+            locationSettings: const LocationSettings(
+              accuracy: LocationAccuracy.high,
+            ),
+          );
+          _latitude = posicao.latitude;
+          _longitude = posicao.longitude;
+        } else {
+          _latitude = null;
+          _longitude = null;
+        }
+      } catch (e) {
+        debugPrint("Erro ao obter localização do GPS: $e");
+        _latitude = null;
+        _longitude = null;
+      }
     } else {
       _latitude = null;
       _longitude = null;
@@ -58,24 +107,41 @@ class DenunciaViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      String? urlPublicaFoto;
-
+      String? urlFoto = _fotoUrlExistente;
       if (_fotoBytes != null && _nomeArquivoFoto != null) {
-        urlPublicaFoto = await _service.subirFoto(_fotoBytes!, _nomeArquivoFoto!);
+        urlFoto = await _service.subirFoto(_fotoBytes!, _nomeArquivoFoto!);
       }
 
-      final novaDenuncia = Denuncia(
-        titulo: tituloCtrl.text,
-        localizacao: localCtrl.text,
-        descricao: descCtrl.text,
-        autor: autorCtrl.text.isEmpty ? "Anônimo" : autorCtrl.text,
-        categoria: _categoriaSelecionada,
-        latitude: _latitude,
-        longitude: _longitude,
-        fotoUrl: urlPublicaFoto,
-      );
+      if (emEdicao) {
+        final original = _denunciaOriginal!;
+        final atualizada = Denuncia(
+          id: original.id,
+          titulo: tituloCtrl.text,
+          localizacao: localCtrl.text,
+          descricao: descCtrl.text,
+          autor: autorCtrl.text.isEmpty ? "Anônimo" : autorCtrl.text,
+          autorId: original.autorId,
+          categoria: _categoriaSelecionada,
+          latitude: _latitude,
+          longitude: _longitude,
+          fotoUrl: urlFoto,
+          status: original.status,
+        );
+        await _service.editarDenuncia(atualizada);
+      } else {
+        final novaDenuncia = Denuncia(
+          titulo: tituloCtrl.text,
+          localizacao: localCtrl.text,
+          descricao: descCtrl.text,
+          autor: autorCtrl.text.isEmpty ? "Anônimo" : autorCtrl.text,
+          categoria: _categoriaSelecionada,
+          latitude: _latitude,
+          longitude: _longitude,
+          fotoUrl: urlFoto,
+        );
+        await _service.enviarDenuncia(novaDenuncia);
+      }
 
-      await _service.enviarDenuncia(novaDenuncia);
       _isLoading = false;
       notifyListeners();
       return true;

@@ -4,14 +4,17 @@ import '../models/denuncia.dart';
 import '../viewmodels/denuncia_viewmodel.dart';
 
 class FormularioDenunciaScreen extends StatefulWidget {
-  const FormularioDenunciaScreen({super.key});
+  const FormularioDenunciaScreen({super.key, this.denuncia});
+
+  /// Quando informada, o formulário abre em modo de edição (US 5.6/5.7).
+  final Denuncia? denuncia;
 
   @override
   State<FormularioDenunciaScreen> createState() => _FormularioDenunciaScreenState();
 }
 
 class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
-  final viewModel = DenunciaViewModel();
+  late final viewModel = DenunciaViewModel(denunciaExistente: widget.denuncia);
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -42,21 +45,29 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Denúncia enviada com sucesso!'),
+            content: Text(
+              viewModel.emEdicao
+                  ? 'Denúncia atualizada com sucesso!'
+                  : 'Denúncia enviada com sucesso!',
+            ),
             backgroundColor: Colors.teal[700],
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
-      viewModel.limpar();
+      if (!viewModel.emEdicao) viewModel.limpar();
       if (mounted) {
-        Navigator.pop(context);
+        Navigator.pop(context, true);
       }
     } else {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Falha ao enviar denúncia. Verifique a conexão.'),
+          SnackBar(
+            content: Text(
+              viewModel.emEdicao
+                  ? 'Falha ao salvar alterações. Verifique a conexão.'
+                  : 'Falha ao enviar denúncia. Verifique a conexão.',
+            ),
             backgroundColor: Colors.redAccent,
             behavior: SnackBarBehavior.floating,
           ),
@@ -112,9 +123,9 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          "Nova Ocorrência",
-                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF37474F)),
+                        Text(
+                          viewModel.emEdicao ? "Editar Ocorrência" : "Nova Ocorrência",
+                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF37474F)),
                         ),
                         const SizedBox(height: 24),
 
@@ -207,6 +218,12 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                                     child: Image.memory(viewModel.fotoBytes!, height: 150, width: double.infinity, fit: BoxFit.cover),
                                   ),
                                   const SizedBox(height: 8),
+                                ] else if (viewModel.fotoUrlExistente != null) ...[
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(6),
+                                    child: Image.network(viewModel.fotoUrlExistente!, height: 150, width: double.infinity, fit: BoxFit.cover),
+                                  ),
+                                  const SizedBox(height: 8),
                                 ],
                                 OutlinedButton.icon(
                                   onPressed: _selecionarFoto,
@@ -250,9 +267,9 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
                             ),
                             child: viewModel.isLoading
                                 ? const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)))
-                                : const Text(
-                                    "REGISTRAR DENÚNCIA",
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                : Text(
+                                    viewModel.emEdicao ? "SALVAR ALTERAÇÕES" : "REGISTRAR DENÚNCIA",
+                                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                           ),
                         ),

@@ -1,28 +1,10 @@
 enum Categoria {
-  infraestrutura(
-    'Infraestrutura',
-    'Buracos, postes apagados, vazamentos, calçadas danificadas ou problemas em prédios.',
-  ),
-  seguranca(
-    'Segurança',
-    'Atividades suspeitas, iluminação precária com sensação de risco ou ocorrências de perigo.',
-  ),
-  limpeza(
-    'Limpeza',
-    'Acúmulo de lixo, entulho, banheiros sem manutenção ou descarte irregular de resíduos.',
-  ),
-  acessibilidade(
-    'Acessibilidade',
-    'Rampas bloqueadas, pisos táteis danificados, elevadores quebrados ou falta de acesso.',
-  ),
-  servicos(
-    'Serviços',
-    'Transporte, atendimento, burocracia ou falhas em serviços prestados no campus.',
-  ),
-  outros(
-    'Outros',
-    'Qualquer outra ocorrência ou problema que não se encaixe nas opções acima.',
-  );
+  infraestrutura('Infraestrutura', 'Buracos, postes apagados, vazamentos, calçadas danificadas ou problemas em prédios.'),
+  seguranca('Segurança', 'Atividades suspeitas, iluminação precária com sensação de risco ou ocorrências de perigo.'),
+  limpeza('Limpeza', 'Acúmulo de lixo, entulho, banheiros sem manutenção ou descarte irregular de resíduos.'),
+  acessibilidade('Acessibilidade', 'Rampas bloqueadas, pisos táteis danificados, elevadores quebrados ou falta de acesso.'),
+  servicos('Serviços', 'Transporte, atendimento, burocracia ou falhas em serviços prestados no campus.'),
+  outros('Outros', 'Qualquer outra ocorrência ou problema que não se encaixe nas opções acima.');
 
   final String label;
   final String descricao;
@@ -36,12 +18,30 @@ enum Categoria {
   }
 }
 
+// NOVO: Enum de status administrativo
+enum StatusDenuncia {
+  pendente('Pendente'),
+  emAnalise('Em Análise'),
+  resolvida('Resolvida');
+
+  final String label;
+  const StatusDenuncia(this.label);
+
+  static StatusDenuncia fromBanco(String? valor) {
+    return StatusDenuncia.values.firstWhere(
+      (e) => e.label.toLowerCase() == valor?.toLowerCase(),
+      orElse: () => StatusDenuncia.pendente,
+    );
+  }
+}
+
 class Denuncia {
   final String? id;
   final String titulo;
   final String descricao;
   final String localizacao;
   final String autor;
+  final String? autorId;
   final Categoria categoria;
   final double? latitude;
   final double? longitude;
@@ -49,6 +49,9 @@ class Denuncia {
   final DateTime? createdAt;
   final int totalApoios;
   final bool jaApoiei;
+  final StatusDenuncia status;
+  final String? setorResponsavel;
+  final String? respostaAdmin;
 
   Denuncia({
     this.id,
@@ -56,6 +59,7 @@ class Denuncia {
     required this.descricao,
     required this.localizacao,
     this.autor = "Anônimo",
+    this.autorId,
     this.categoria = Categoria.outros,
     this.latitude,
     this.longitude,
@@ -63,6 +67,9 @@ class Denuncia {
     this.createdAt,
     this.totalApoios = 0,
     this.jaApoiei = false,
+    this.status = StatusDenuncia.pendente,
+    this.setorResponsavel,
+    this.respostaAdmin,
   });
 
   factory Denuncia.fromJson(Map<String, dynamic> json) {
@@ -72,19 +79,19 @@ class Denuncia {
       descricao: json['descricao'],
       localizacao: json['localizacao'],
       autor: json['autor'] ?? "Anônimo",
+      autorId: json['autor_id'],
       categoria: Categoria.fromBanco(json['categoria']),
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       fotoUrl: json['foto_url'],
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'])
-          : null,
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       totalApoios: _parseTotalApoios(json['apoios']),
+      status: StatusDenuncia.fromBanco(json['status']),
+      setorResponsavel: json['setor_responsavel'],
+      respostaAdmin: json['resposta_admin'],
     );
   }
 
-  // Com select('*, apoios(count)') o PostgREST retorna apoios: [{count: N}].
-  // Também aceita inteiro direto e cai para 0 quando o campo está ausente.
   static int _parseTotalApoios(dynamic apoios) {
     if (apoios is int) return apoios;
     if (apoios is List && apoios.isNotEmpty) {
@@ -96,13 +103,20 @@ class Denuncia {
     return 0;
   }
 
-  Denuncia copyWith({int? totalApoios, bool? jaApoiei}) {
+  Denuncia copyWith({
+    int? totalApoios, 
+    bool? jaApoiei,
+    StatusDenuncia? status,
+    String? setorResponsavel,
+    String? respostaAdmin,
+  }) {
     return Denuncia(
       id: id,
       titulo: titulo,
       descricao: descricao,
       localizacao: localizacao,
       autor: autor,
+      autorId: autorId,
       categoria: categoria,
       latitude: latitude,
       longitude: longitude,
@@ -110,6 +124,9 @@ class Denuncia {
       createdAt: createdAt,
       totalApoios: totalApoios ?? this.totalApoios,
       jaApoiei: jaApoiei ?? this.jaApoiei,
+      status: status ?? this.status,
+      setorResponsavel: setorResponsavel ?? this.setorResponsavel,
+      respostaAdmin: respostaAdmin ?? this.respostaAdmin,
     );
   }
 
@@ -119,10 +136,14 @@ class Denuncia {
       'descricao': descricao,
       'localizacao': localizacao,
       'autor': autor,
+      if (autorId != null) 'autor_id': autorId,
       'categoria': categoria.name,
       'latitude': latitude,
       'longitude': longitude,
+      'status': status.label,
       if (fotoUrl != null) 'foto_url': fotoUrl,
+      if (setorResponsavel != null) 'setor_responsavel': setorResponsavel,
+      if (respostaAdmin != null) 'resposta_admin': respostaAdmin,
     };
   }
 }
