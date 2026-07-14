@@ -50,9 +50,17 @@ class DenunciaService {
   }
 
   /// Envia uma denúncia para o banco de dados, após validar as coordenadas.
+  ///
+  /// O autor_id é preenchido com o id do usuário autenticado no momento do
+  /// envio (Épico 5). Sem sessão ativa, a denúncia é enviada sem dono (nulo).
   Future<void> enviarDenuncia(Denuncia denuncia) async {
     _validarCoordenadas(denuncia.latitude, denuncia.longitude);
-    await _supabase.from('denuncias').insert(denuncia.toJson());
+    final dados = denuncia.toJson();
+    final autorId = _supabase.auth.currentUser?.id;
+    if (autorId != null) {
+      dados['autor_id'] = autorId;
+    }
+    await _supabase.from('denuncias').insert(dados);
   }
 
   /// Obtém todas as denúncias do banco de dados, ordenadas pela data de criação em ordem decrescente.
@@ -72,6 +80,47 @@ class DenunciaService {
       final denuncia = Denuncia.fromJson(json);
       return denuncia.copyWith(jaApoiei: idsApoiados.contains(denuncia.id));
     }).toList();
+  }
+
+  /// Atualiza uma denúncia existente (US 5.6/5.7). Só o autor pode editar —
+  /// esta checagem é só uma barreira rápida de UX; quem garante de verdade é
+  /// a RLS (`auth.uid() = autor_id`) da tabela `denuncias`.
+  Future<void> editarDenuncia(Denuncia denuncia) async {
+    _garantirAutoria(denuncia);
+    _validarCoordenadas(denuncia.latitude, denuncia.longitude);
+    await _supabase.from('denuncias').update(denuncia.toJson()).eq('id', denuncia.id!);
+  }
+
+  /// Exclui uma denúncia existente (US 5.6/5.7). Mesma checagem de autoria
+  /// de [editarDenuncia], reforçada pela RLS no banco.
+  Future<void> excluirDenuncia(Denuncia denuncia) async {
+    _garantirAutoria(denuncia);
+    await _supabase.from('denuncias').delete().eq('id', denuncia.id!);
+  }
+
+  /// Garante que a denúncia pertence ao usuário autenticado antes de editar
+  /// ou excluir.
+  void _garantirAutoria(Denuncia denuncia) {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null || denuncia.autorId == null || denuncia.autorId != userId) {
+      throw Exception('Você só pode editar ou excluir suas próprias denúncias.');
+    }
+  }
+
+  /// Obtém apenas as denúncias registradas pelo usuário autenticado (US 5.3),
+  /// ordenadas pela data de criação em ordem decrescente. Sem sessão ativa,
+  /// retorna lista vazia.
+  Future<List<Denuncia>> obterMinhasDenuncias() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) return [];
+
+    final response = await _supabase
+        .from('denuncias')
+        .select()
+        .eq('autor_id', userId)
+        .order('created_at', ascending: false);
+
+    return (response as List).map((json) => Denuncia.fromJson(json)).toList();
   }
 
   /// Registra o apoio (upvote) do dispositivo atual em uma denúncia.

@@ -41,6 +41,7 @@ class Denuncia {
   final String descricao;
   final String localizacao;
   final String autor;
+  final String? autorId;
   final Categoria categoria;
   final double? latitude;
   final double? longitude;
@@ -48,8 +49,6 @@ class Denuncia {
   final DateTime? createdAt;
   final int totalApoios;
   final bool jaApoiei;
-  
-  // NOVOS CAMPOS ADMIN
   final StatusDenuncia status;
   final String? setorResponsavel;
   final String? respostaAdmin;
@@ -60,6 +59,7 @@ class Denuncia {
     required this.descricao,
     required this.localizacao,
     this.autor = "Anônimo",
+    this.autorId,
     this.categoria = Categoria.outros,
     this.latitude,
     this.longitude,
@@ -79,6 +79,7 @@ class Denuncia {
       descricao: json['descricao'],
       localizacao: json['localizacao'],
       autor: json['autor'] ?? "Anônimo",
+      autorId: json['autor_id'],
       categoria: Categoria.fromBanco(json['categoria']),
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
@@ -115,6 +116,7 @@ class Denuncia {
       descricao: descricao,
       localizacao: localizacao,
       autor: autor,
+      autorId: autorId,
       categoria: categoria,
       latitude: latitude,
       longitude: longitude,
@@ -134,6 +136,7 @@ class Denuncia {
       'descricao': descricao,
       'localizacao': localizacao,
       'autor': autor,
+      if (autorId != null) 'autor_id': autorId,
       'categoria': categoria.name,
       'latitude': latitude,
       'longitude': longitude,

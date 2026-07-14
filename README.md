@@ -10,7 +10,11 @@ Um app para que alunos e funcionários registrem problemas no campus de forma si
 
 ### Estilo Arquitetural Adotado
 
-- **No Cliente (Frontend):** padrão **MVVM (Model-View-ViewModel)** com Flutter, com separação estrita entre a interface de usuário (`lib/views/`), a lógica de estado e validação (`lib/viewmodels/`) e as entidades de dados (`lib/models/`).
+- **No Cliente (Frontend):** padrão **MVVM + Services** com Flutter. O clássico MVVM (Model-View-ViewModel) é complementado por uma camada explícita de **Services**, que concentra o acesso a dados e as regras de negócio. A separação é estrita entre quatro responsabilidades:
+    - **View** (`lib/views/`): a interface de usuário.
+    - **ViewModel** (`lib/viewmodels/`): a lógica de estado e validação, que faz a ponte entre a View e os Services.
+    - **Model / Entidades** (`lib/models/`): as entidades de dados (`Denuncia`, `Categoria`), que sabem apenas se traduzir de/para o formato do banco (`fromJson`/`toJson`) e não acessam rede.
+    - **Services** (`lib/services/`): `DenunciaService` e `DispositivoService`, que encapsulam o acesso ao Supabase e as regras de negócio (buscar, enviar, apoiar, gerar o id de dispositivo). Operam sobre as entidades e conversam com o mundo externo.
 - **No Sistema Geral:** arquitetura **Cliente-Servidor (Serverless / BaaS)**. O aplicativo Flutter consome o **Supabase** diretamente via requisições HTTP/REST (PostgREST) para o banco e via Supabase Storage para upload de fotos — não há servidor de aplicação intermediário.
 - **Identidade e anonimato:** o projeto não usa Supabase Auth. Cada denúncia é opcionalmente anônima, e os apoios (upvotes) são vinculados a um identificador de dispositivo gerado e persistido localmente (`DispositivoService`), preservando o anonimato do usuário no feed.
 - **Padrão de Projeto (Singleton):** `DenunciaService` e `DispositivoService` implementam Singleton (construtor privado + instância estática via `factory`), garantindo uma única instância de acesso ao cliente Supabase e ao identificador de dispositivo, evitando conexões redundantes e inconsistência de estado entre telas.
@@ -47,13 +51,15 @@ graph TD
     V1["Views<br/>FormularioDenunciaScreen, FeedScreen, DenunciaCard"]
     VM1["ViewModels<br/>DenunciaViewModel, FeedViewModel"]
     S1["Services (Singleton)<br/>DenunciaService, DispositivoService"]
+    M1["Models / Entidades<br/>Denuncia, Categoria"]
     SDK["Supabase SDK<br/>(supabase_flutter)"]
 
     V1 -->|comandos do usuário| VM1
     VM1 -->|valida e delega| S1
     S1 -->|chamadas REST/Storage| SDK
-    SDK -->|resposta| S1
-    S1 -->|Denuncia / erros| VM1
+    SDK -->|JSON cru| S1
+    S1 -.->|mapeia JSON ↔ objeto<br/>via fromJson / toJson| M1
+    S1 -->|objetos Denuncia / erros| VM1
     VM1 -->|estado atualizado| V1
 ```
 

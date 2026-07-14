@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/denuncia.dart';
 import '../services/denuncia_service.dart';
+import '../utils/filtro_denuncias.dart';
 
 enum TipoOrdenacao {
   recente,
@@ -35,17 +36,6 @@ class FeedViewModel extends ChangeNotifier {
 
     try {
       _allDenuncias = await _service.obtenerDenuncias();
-      _allDenuncias.insert(0, Denuncia(
-        id: "teste_mock_axel",
-        titulo: "Lâmpada Quebrada na Unicamp",
-        descricao: "A lâmpada perto do bandejão está piscando faz duas semanas. Perigoso andar por aqui à noite.",
-        localizacao: "Perto do Restaurante Universitário",
-        autor: "Axel (Teste Frontend)",
-        latitude: -22.8184,
-        longitude: -47.0647,
-        fotoUrl: "https://picsum.photos/400/200",
-        createdAt: DateTime.now(),
-      ));
       _aplicarFiltrosEOrdenacao();
     } catch (e) {
       _erro = "Erro ao carregar denúncias";
@@ -104,15 +94,11 @@ class FeedViewModel extends ChangeNotifier {
   }
 
   void _aplicarFiltrosEOrdenacao() {
-    _denunciasFiltradas = _allDenuncias.where((d) {
-      final passaTexto = _filtroTexto.isEmpty ||
-          d.titulo.toLowerCase().contains(_filtroTexto) ||
-          d.descricao.toLowerCase().contains(_filtroTexto) ||
-          d.localizacao.toLowerCase().contains(_filtroTexto);
-      final passaCategoria =
-          _filtroCategoria == null || d.categoria == _filtroCategoria;
-      return passaTexto && passaCategoria;
-    }).toList();
+    _denunciasFiltradas = FiltroDenuncias.aplicar(
+      _allDenuncias,
+      texto: _filtroTexto,
+      categoria: _filtroCategoria,
+    );
 
     switch (_tipoOrdenacao) {
       case TipoOrdenacao.recente:
