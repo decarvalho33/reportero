@@ -168,6 +168,32 @@ class DenunciaService {
   // Protegidas por RLS no Supabase. Lançarão erro se o usuário não for admin.
   // ==========================================
 
+  /// (US 6.1) Verifica se o usuário autenticado atualmente é um administrador.
+  Future<bool> verificarPrivilegioAdmin() async {
+    final user = _supabase.auth.currentUser;
+
+    print("Usuario: ${user?.id}");
+
+    if (user == null) return false;
+
+    try {
+      final response = await _supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', user.id)
+          .single();
+
+      print("Respuesta: $response");   
+
+      return response['is_admin'] == true;
+    } catch (e) {
+      print("ERROR: $e");
+      // Se houver erro ou o perfil não existir,
+      // considera que o usuário não é administrador.
+      return false;
+    }
+  }
+
   /// (US 6.4) Atualiza o status de uma denúncia.
   Future<void> atualizarStatus(String denunciaId, StatusDenuncia novoStatus) async {
     await _supabase
@@ -200,4 +226,24 @@ class DenunciaService {
         .eq('id', perfilId);
   }
 
+  /// (US 6.9) Lista todos los usuários cadastrados.
+  Future<List<Map<String, dynamic>>> listarPerfis() async {
+  final response = await _supabase
+      .from('profiles')
+      .select('id, nome, is_admin')
+      .order('nome');
+
+  print("Perfis recebidos: ${response.length}");
+  print(response.toString());
+
+  return List<Map<String, dynamic>>.from(response);
+}
+
+  /// (US 6.9) Revoga privilégios de administrador.
+  Future<void> removerAdmin(String perfilId) async {
+    await _supabase
+        .from('profiles')
+        .update({'is_admin': false})
+        .eq('id', perfilId);
+  }
 }
