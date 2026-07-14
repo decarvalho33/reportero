@@ -63,103 +63,9 @@ class _FeedScreenState extends State<FeedScreen> {
               StreamBuilder(
                 stream: _authViewModel.mudancasDeSessao,
                 builder: (context, snapshot) {
-                  final logado = _authViewModel.estaLogado;
                   return Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _isScrolled
-                          ? IconButton(
-                              onPressed: () {
-                                if (!logado) {
-                                  Navigator.pushNamed(context, '/login');
-                                } else {
-                                  Navigator.pushNamed(context, '/perfil');
-                                }
-                              },
-                              tooltip: logado ? 'Perfil' : 'Entrar',
-                              visualDensity: VisualDensity.compact,
-                              icon: Icon(
-                                logado ? Icons.account_circle : Icons.login,
-                                color: Colors.white,
-                                size: 28,
-                              ),
-                            )
-                          : TextButton.icon(
-                              onPressed: () {
-                                if (!logado) {
-                                  Navigator.pushNamed(context, '/login');
-                                } else {
-                                  Navigator.pushNamed(context, '/perfil');
-                                }
-                              },
-                              style: TextButton.styleFrom(
-                                visualDensity: VisualDensity.compact,
-                              ),
-                              icon: Icon(
-                                logado ? Icons.account_circle : Icons.login,
-                                color: Colors.white,
-                              ),
-                              label: Text(
-                                logado
-                                    ? (_authViewModel.nomeUsuario
-                                              ?.split(' ')
-                                              .first ??
-                                          'Perfil')
-                                    : 'Entrar',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                      if (logado)
-                        IconButton(
-                          visualDensity: VisualDensity.compact,
-                          icon: const Icon(Icons.logout, color: Colors.white),
-                          tooltip: 'Sair',
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text('Sair da conta'),
-                                content: const Text(
-                                  'Tem certeza que deseja sair do aplicativo?',
-                                ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    style: TextButton.styleFrom(
-                                      foregroundColor: Colors.grey[700],
-                                    ),
-                                    child: const Text('Cancelar'),
-                                  ),
-                                  TextButton(
-                                    onPressed: () async {
-                                      Navigator.pop(context);
-                                      await _authViewModel.sair();
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                              'Você saiu da sua conta',
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    style: TextButton.styleFrom(
-                                      foregroundColor: Colors.red,
-                                    ),
-                                    child: const Text('Sair'),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                    ],
+                    children: _buildSliverActions(_authViewModel.estaLogado),
                   );
                 },
               ),
@@ -334,6 +240,76 @@ class _FeedScreenState extends State<FeedScreen> {
           fontSize: 13,
         ),
         showCheckmark: false,
+      ),
+    );
+  }
+
+  List<Widget> _buildSliverActions(bool logado) {
+    return [
+      _isScrolled
+          ? IconButton(
+              onPressed: () => _redirecionarParaAutenticados('/perfil'),
+              tooltip: logado ? 'Perfil' : 'Entrar',
+              visualDensity: VisualDensity.compact,
+              icon: Icon(
+                logado ? Icons.account_circle : Icons.login,
+                color: Colors.white,
+                size: 28,
+              ),
+            )
+          : TextButton.icon(
+              onPressed: () => _redirecionarParaAutenticados('/perfil'),
+              style: TextButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+              ),
+              icon: Icon(
+                logado ? Icons.account_circle : Icons.login,
+                color: Colors.white,
+              ),
+              label: Text(
+                logado ? (_authViewModel.primeiroNomeUsuario ?? 'Perfil') : 'Entrar',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+      if (logado)
+        IconButton(
+          visualDensity: VisualDensity.compact,
+          icon: const Icon(Icons.logout, color: Colors.white),
+          tooltip: 'Sair',
+          onPressed: () => _exibirDialogoSairConta(),
+        ),
+    ];
+  }
+
+  void _exibirDialogoSairConta() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Sair da conta'),
+        content: const Text('Tem certeza que deseja sair do aplicativo?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(foregroundColor: Colors.grey[700]),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _authViewModel.sair();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Você saiu da sua conta')),
+                );
+              }
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Sair'),
+          ),
+        ],
       ),
     );
   }
