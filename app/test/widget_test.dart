@@ -72,8 +72,15 @@ void main() {
     expect(find.text('Segurança'), findsOneWidget);
   });
 
-  testWidgets('localização é tocável e abre o menu de mapas', (tester) async {
-    await tester.pumpWidget(buildCard(denunciaBase));
+  testWidgets('localização é tocável e abre o menu de mapas quando há coordenadas', (tester) async {
+    final denunciaComGps = Denuncia(
+      titulo: 'Buraco',
+      descricao: 'Descrição',
+      localizacao: 'IC-3',
+      latitude: -22.81,
+      longitude: -47.06,
+    );
+    await tester.pumpWidget(buildCard(denunciaComGps));
 
     // Dica indicando que a localização é tocável
     expect(find.text('Toque para abrir no mapa'), findsOneWidget);
@@ -83,6 +90,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Google Maps'), findsOneWidget);
     expect(find.text('Apple Maps'), findsOneWidget);
+  });
+
+  testWidgets('não permite abrir mapa quando não há coordenadas', (tester) async {
+    await tester.pumpWidget(buildCard(denunciaBase));
+    
+    // A dica não deve aparecer
+    expect(find.text('Toque para abrir no mapa'), findsNothing);
   });
 
   testWidgets('exibe a imagem quando fotoUrl é fornecida', (tester) async {
