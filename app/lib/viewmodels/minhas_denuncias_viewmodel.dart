@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/denuncia.dart';
 import '../services/auth_service.dart';
 import '../services/denuncia_service.dart';
+import '../services/status_visto_service.dart';
 import '../utils/filtro_denuncias.dart';
 
 class MinhasDenunciasViewModel extends ChangeNotifier {
@@ -9,13 +10,16 @@ class MinhasDenunciasViewModel extends ChangeNotifier {
     Future<List<Denuncia>> Function()? buscarDenuncias,
     Future<void> Function(Denuncia)? excluirDenuncia,
     AuthService? authService,
+    StatusVistoService? statusVistoService,
   })  : _buscarDenuncias = buscarDenuncias ?? DenunciaService().obterMinhasDenuncias,
         _excluirDenuncia = excluirDenuncia ?? DenunciaService().excluirDenuncia,
-        _auth = authService ?? AuthService();
+        _auth = authService ?? AuthService(),
+        _statusVisto = statusVistoService ?? StatusVistoService();
 
   final Future<List<Denuncia>> Function() _buscarDenuncias;
   final Future<void> Function(Denuncia) _excluirDenuncia;
   final AuthService _auth;
+  final StatusVistoService _statusVisto;
 
   List<Denuncia> _todasDenuncias = [];
   List<Denuncia> _denunciasFiltradas = [];
@@ -24,6 +28,7 @@ class MinhasDenunciasViewModel extends ChangeNotifier {
   String _filtroTexto = '';
   Categoria? _filtroCategoria;
   StatusDenuncia? _filtroStatus;
+  Set<String> _denunciasComMudancaDeStatus = {};
 
   List<Denuncia> get denuncias => _denunciasFiltradas;
   bool get isLoading => _isLoading;
@@ -32,6 +37,16 @@ class MinhasDenunciasViewModel extends ChangeNotifier {
   Categoria? get filtroCategoria => _filtroCategoria;
   StatusDenuncia? get filtroStatus => _filtroStatus;
   bool get temDenunciasCadastradas => _todasDenuncias.isNotEmpty;
+
+  /// Ids das denúncias cujo status mudou desde a última vez que o usuário as
+  /// visualizou (US 5.5). Denúncias nunca vistas antes não entram aqui.
+  Set<String> get denunciasComMudancaDeStatus => _denunciasComMudancaDeStatus;
+
+  /// Indica se [denuncia] teve seu status alterado desde a última visualização.
+  bool temMudancaDeStatus(Denuncia denuncia) {
+    final id = denuncia.id;
+    return id != null && _denunciasComMudancaDeStatus.contains(id);
+  }
 
   /// Status distintos entre as denúncias do usuário, na ordem do enum
   /// (pendente, em análise, resolvida), para montar os filtros.
@@ -49,6 +64,7 @@ class MinhasDenunciasViewModel extends ChangeNotifier {
     try {
       _todasDenuncias = await _buscarDenuncias();
       _aplicarFiltros();
+      await _detectarMudancasDeStatus();
     } catch (e) {
       _erro = 'Não foi possível carregar suas denúncias.';
     }
@@ -99,6 +115,38 @@ class MinhasDenunciasViewModel extends ChangeNotifier {
       categoria: _filtroCategoria,
       status: _filtroStatus,
     );
+  }
+
+  /// Compara o status atual de cada denúncia com o último status visto
+  /// (US 5.5). Uma denúncia sem entrada no mapa de vistos ainda não foi
+  /// vista nenhuma vez, então não conta como mudança — só entra na lista
+  /// quando havia um status registrado e ele é diferente do atual.
+  Future<void> _detectarMudancasDeStatus() async {
+    final vistos = await _statusVisto.obterStatusVistos();
+    final mudancas = <String>{};
+
+    for (final denuncia in _todasDenuncias) {
+      final id = denuncia.id;
+      if (id == null) continue;
+
+      final ultimoVisto = vistos[id];
+      if (ultimoVisto != null && ultimoVisto != denuncia.status.label) {
+        mudancas.add(id);
+      }
+    }
+
+    _denunciasComMudancaDeStatus = mudancas;
+  }
+
+  /// Marca [denuncia] como vista (US 5.5): grava seu status atual como o
+  /// último visto e some com o indicador de mudança pendente.
+  Future<void> marcarComoVisto(Denuncia denuncia) async {
+    final id = denuncia.id;
+    if (id == null) return;
+
+    await _statusVisto.marcarComoVisto(id, denuncia.status);
+    _denunciasComMudancaDeStatus.remove(id);
+    notifyListeners();
   }
 
   @visibleForTesting

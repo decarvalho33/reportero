@@ -44,9 +44,5 @@ void main() {
       expect(vistos.length, equals(1));
       expect(vistos['denuncia-1'], equals(StatusDenuncia.resolvida.label));
     });
-
-    test('a fábrica devolve sempre a mesma instância (Singleton)', () {
-      expect(identical(StatusVistoService(), StatusVistoService()), isTrue);
-    });
   });
 }

@@ -13,14 +13,6 @@ class StatusVistoService {
   /// Chave usada para guardar o mapa serializado no armazenamento local.
   static const String _chave = 'reportero_status_vistos';
 
-  static final StatusVistoService _instance = StatusVistoService._internal();
-
-  StatusVistoService._internal();
-
-  factory StatusVistoService() {
-    return _instance;
-  }
-
   /// Retorna o mapa denunciaId -> label do último status visto. Vazio caso
   /// nada tenha sido salvo ainda.
   Future<Map<String, String>> obterStatusVistos() async {

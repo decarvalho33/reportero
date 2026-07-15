@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app/models/denuncia.dart';
 import 'package:app/services/auth_service.dart';
+import 'package:app/services/status_visto_service.dart';
 import 'package:app/viewmodels/minhas_denuncias_viewmodel.dart';
 
 class _FakeAuthService extends AuthService {
@@ -10,6 +12,20 @@ class _FakeAuthService extends AuthService {
 
   @override
   User? get usuarioAtual => _usuario;
+}
+
+class _FakeStatusVistoService extends StatusVistoService {
+  _FakeStatusVistoService([Map<String, String>? vistosIniciais])
+      : _vistos = Map.of(vistosIniciais ?? {});
+  final Map<String, String> _vistos;
+
+  @override
+  Future<Map<String, String>> obterStatusVistos() async => Map.of(_vistos);
+
+  @override
+  Future<void> marcarComoVisto(String denunciaId, StatusDenuncia status) async {
+    _vistos[denunciaId] = status.label;
+  }
 }
 
 const _usuarioLogado = User(
@@ -22,6 +38,12 @@ const _usuarioLogado = User(
 );
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   group('carregar', () {
     test('popula a lista de denúncias com o resultado da busca', () async {
       final denuncias = [
@@ -199,6 +221,108 @@ void main() {
       expect(sucesso, isFalse);
       expect(viewModel.erro, isNotNull);
       expect(viewModel.denuncias, equals([denuncia]));
+    });
+  });
+
+  group('mudança de status (US 5.5)', () {
+    test('denúncia nunca vista antes não conta como mudança', () async {
+      final denuncia = Denuncia(
+        id: '1',
+        titulo: 'Buraco',
+        descricao: 'Desc',
+        localizacao: 'IC-3',
+        status: StatusDenuncia.pendente,
+      );
+      final viewModel = MinhasDenunciasViewModel(
+        buscarDenuncias: () async => [denuncia],
+        authService: _FakeAuthService(_usuarioLogado),
+        statusVistoService: _FakeStatusVistoService(),
+      );
+
+      await viewModel.carregar();
+
+      expect(viewModel.temMudancaDeStatus(denuncia), isFalse);
+      expect(viewModel.denunciasComMudancaDeStatus, isEmpty);
+    });
+
+    test('status igual ao último visto não conta como mudança', () async {
+      final denuncia = Denuncia(
+        id: '1',
+        titulo: 'Buraco',
+        descricao: 'Desc',
+        localizacao: 'IC-3',
+        status: StatusDenuncia.pendente,
+      );
+      final viewModel = MinhasDenunciasViewModel(
+        buscarDenuncias: () async => [denuncia],
+        authService: _FakeAuthService(_usuarioLogado),
+        statusVistoService: _FakeStatusVistoService({'1': StatusDenuncia.pendente.label}),
+      );
+
+      await viewModel.carregar();
+
+      expect(viewModel.temMudancaDeStatus(denuncia), isFalse);
+    });
+
+    test('status diferente do último visto conta como mudança', () async {
+      final denuncia = Denuncia(
+        id: '1',
+        titulo: 'Buraco',
+        descricao: 'Desc',
+        localizacao: 'IC-3',
+        status: StatusDenuncia.resolvida,
+      );
+      final viewModel = MinhasDenunciasViewModel(
+        buscarDenuncias: () async => [denuncia],
+        authService: _FakeAuthService(_usuarioLogado),
+        statusVistoService: _FakeStatusVistoService({'1': StatusDenuncia.pendente.label}),
+      );
+
+      await viewModel.carregar();
+
+      expect(viewModel.temMudancaDeStatus(denuncia), isTrue);
+      expect(viewModel.denunciasComMudancaDeStatus, equals({'1'}));
+    });
+
+    test('marcar como vista limpa a mudança', () async {
+      final denuncia = Denuncia(
+        id: '1',
+        titulo: 'Buraco',
+        descricao: 'Desc',
+        localizacao: 'IC-3',
+        status: StatusDenuncia.resolvida,
+      );
+      final viewModel = MinhasDenunciasViewModel(
+        buscarDenuncias: () async => [denuncia],
+        authService: _FakeAuthService(_usuarioLogado),
+        statusVistoService: _FakeStatusVistoService({'1': StatusDenuncia.pendente.label}),
+      );
+      await viewModel.carregar();
+      expect(viewModel.temMudancaDeStatus(denuncia), isTrue);
+
+      await viewModel.marcarComoVisto(denuncia);
+
+      expect(viewModel.temMudancaDeStatus(denuncia), isFalse);
+      expect(viewModel.denunciasComMudancaDeStatus, isEmpty);
+    });
+
+    test('ignora denúncias sem id ao detectar e marcar como vista', () async {
+      final denunciaSemId = Denuncia(
+        titulo: 'Anônima',
+        descricao: 'Desc',
+        localizacao: 'IC-3',
+        status: StatusDenuncia.resolvida,
+      );
+      final viewModel = MinhasDenunciasViewModel(
+        buscarDenuncias: () async => [denunciaSemId],
+        authService: _FakeAuthService(_usuarioLogado),
+        statusVistoService: _FakeStatusVistoService(),
+      );
+
+      await viewModel.carregar();
+
+      expect(viewModel.temMudancaDeStatus(denunciaSemId), isFalse);
+      await viewModel.marcarComoVisto(denunciaSemId);
     });
   });
 }
