@@ -25,6 +25,12 @@ class _FormularioDenunciaScreenState extends State<FormularioDenunciaScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    viewModel.dispose();
+    super.dispose();
+  }
+
   Future<void> _selecionarFoto() async {
     try {
       final XFile? imagem = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
