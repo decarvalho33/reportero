@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:app/models/denuncia.dart';
 import 'package:app/services/auth_service.dart';
+import 'package:app/services/status_visto_service.dart';
 import 'package:app/viewmodels/minhas_denuncias_viewmodel.dart';
 import 'package:app/views/minhas_denuncias_screen.dart';
 
@@ -12,6 +14,20 @@ class _FakeAuthService extends AuthService {
 
   @override
   User? get usuarioAtual => _usuario;
+}
+
+class _FakeStatusVistoService extends StatusVistoService {
+  _FakeStatusVistoService([Map<String, String>? vistosIniciais])
+      : _vistos = Map.of(vistosIniciais ?? {});
+  final Map<String, String> _vistos;
+
+  @override
+  Future<Map<String, String>> obterStatusVistos() async => Map.of(_vistos);
+
+  @override
+  Future<void> marcarComoVisto(String denunciaId, StatusDenuncia status) async {
+    _vistos[denunciaId] = status.label;
+  }
 }
 
 const _usuarioLogado = User(
@@ -24,6 +40,10 @@ const _usuarioLogado = User(
 );
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('exibe resumo (título, categoria, status e data) das denúncias do usuário', (
     tester,
   ) async {
@@ -247,6 +267,93 @@ void main() {
       expect(excluida, equals(denuncia));
       expect(find.text('Buraco na calçada'), findsNothing);
       expect(find.text('Denúncia excluída.'), findsOneWidget);
+    });
+  });
+
+  group('notificação de mudança de status (US 5.5)', () {
+    final denunciaComMudanca = Denuncia(
+      id: '1',
+      titulo: 'Buraco na calçada',
+      descricao: 'Descrição',
+      localizacao: 'IC-3',
+      status: StatusDenuncia.resolvida,
+    );
+    final denunciaSemMudanca = Denuncia(
+      id: '2',
+      titulo: 'Porta arrombada',
+      descricao: 'Descrição',
+      localizacao: 'CB',
+      status: StatusDenuncia.pendente,
+    );
+
+    testWidgets(
+      'exibe o indicador só para a denúncia cujo status mudou, com o novo status explícito',
+      (tester) async {
+        final viewModel = MinhasDenunciasViewModel(
+          buscarDenuncias: () async => [denunciaComMudanca, denunciaSemMudanca],
+          authService: _FakeAuthService(_usuarioLogado),
+          statusVistoService: _FakeStatusVistoService({
+            '1': StatusDenuncia.pendente.label, // visto como Pendente; agora é Resolvida.
+            '2': StatusDenuncia.pendente.label, // igual ao atual: sem mudança.
+          }),
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(home: MinhasDenunciasScreen(viewModel: viewModel)),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Novo status: Resolvida'), findsOneWidget);
+        expect(find.text('1 denúncia com status atualizado'), findsOneWidget);
+
+        final tilePortaArrombada = find.ancestor(
+          of: find.text('Porta arrombada'),
+          matching: find.byType(Card),
+        );
+        expect(
+          find.descendant(
+            of: tilePortaArrombada,
+            matching: find.textContaining('Novo status:'),
+          ),
+          findsNothing,
+        );
+      },
+    );
+
+    testWidgets('denúncia nunca vista antes não exibe o indicador', (tester) async {
+      final viewModel = MinhasDenunciasViewModel(
+        buscarDenuncias: () async => [denunciaComMudanca],
+        authService: _FakeAuthService(_usuarioLogado),
+        statusVistoService: _FakeStatusVistoService(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(home: MinhasDenunciasScreen(viewModel: viewModel)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Novo status:'), findsNothing);
+    });
+
+    testWidgets('tocar no indicador marca como visto e remove o destaque', (tester) async {
+      final viewModel = MinhasDenunciasViewModel(
+        buscarDenuncias: () async => [denunciaComMudanca],
+        authService: _FakeAuthService(_usuarioLogado),
+        statusVistoService: _FakeStatusVistoService({'1': StatusDenuncia.pendente.label}),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(home: MinhasDenunciasScreen(viewModel: viewModel)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Novo status: Resolvida'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Marcar novo status como visto'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Novo status: Resolvida'), findsNothing);
+      expect(find.text('1 denúncia com status atualizado'), findsNothing);
     });
   });
 }
