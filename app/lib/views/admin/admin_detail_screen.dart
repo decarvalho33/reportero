@@ -25,6 +25,12 @@ class _AdminDetailScreenState extends State<AdminDetailScreen> {
     denuncia = widget.denuncia;
   }
 
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {

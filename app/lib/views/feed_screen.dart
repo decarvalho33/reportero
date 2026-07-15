@@ -22,9 +22,13 @@ class _FeedScreenState extends State<FeedScreen> {
   /// Se não estiver, envia para a tela de login.
   void _redirecionarParaAutenticados(String rota) {
     if (!_authViewModel.estaLogado) {
-      Navigator.pushNamed(context, '/login').then((_) => _viewModel.carregarDenuncias());
+      Navigator.pushNamed(context, '/login').then((_) {
+        if (mounted) _viewModel.carregarDenuncias();
+      });
     } else {
-      Navigator.pushNamed(context, rota).then((_) => _viewModel.carregarDenuncias());
+      Navigator.pushNamed(context, rota).then((_) {
+        if (mounted) _viewModel.carregarDenuncias();
+      });
     }
   }
 
@@ -53,6 +57,7 @@ class _FeedScreenState extends State<FeedScreen> {
   void dispose() {
     _scrollController.dispose();
     _viewModel.dispose();
+    _authViewModel.dispose();
     super.dispose();
   }
 
@@ -115,7 +120,9 @@ class _FeedScreenState extends State<FeedScreen> {
                 visualDensity: VisualDensity.compact,
                 icon: const Icon(Icons.add_circle_outline, color: Colors.white),
                 tooltip: 'Nova Denúncia',
-                onPressed: () => Navigator.pushNamed(context, '/nova').then((_) => _viewModel.carregarDenuncias()),
+                onPressed: () => Navigator.pushNamed(context, '/nova').then((_) {
+                  if (mounted) _viewModel.carregarDenuncias();
+                }),
               ),
               const SizedBox(width: 4),
             ],
@@ -236,7 +243,9 @@ class _FeedScreenState extends State<FeedScreen> {
       ),
 
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.pushNamed(context, '/nova').then((_) => _viewModel.carregarDenuncias()),
+        onPressed: () => Navigator.pushNamed(context, '/nova').then((_) {
+          if (mounted) _viewModel.carregarDenuncias();
+        }),
         backgroundColor: const Color(0xFF2E7D32),
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),

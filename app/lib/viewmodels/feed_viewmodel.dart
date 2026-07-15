@@ -12,6 +12,21 @@ enum TipoOrdenacao {
 class FeedViewModel extends ChangeNotifier {
   final _service = DenunciaService();
 
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
+
   DenunciaService get service => _service;
 
   List<Denuncia> _allDenuncias = [];
