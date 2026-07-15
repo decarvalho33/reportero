@@ -141,6 +141,29 @@ class AuthService {
     }
   }
 
+  /// Troca a senha do usuário já autenticado (Épico 4 — trocar senha).
+  ///
+  /// Diferente de [atualizarSenha] (usada após o link de recuperação, onde o
+  /// próprio email já prova a identidade), aqui a sessão já está aberta.
+  /// Por isso reautentica com a senha atual via [entrar] antes de aplicar a
+  /// nova, evitando que alguém com o dispositivo destravado troque a senha
+  /// sem conhecer a atual. A nova senha passa pela mesma validação de
+  /// [senhaValida] usada em todo o resto do fluxo de autenticação.
+  Future<void> trocarSenha({
+    required String senhaAtual,
+    required String novaSenha,
+  }) async {
+    if (!senhaValida(novaSenha)) {
+      throw ArgumentError('A senha deve ter ao menos $senhaMinima caracteres.');
+    }
+    final email = usuarioAtual?.email;
+    if (email == null) {
+      throw Exception('Nenhum usuário autenticado.');
+    }
+    await entrar(email: email, senha: senhaAtual);
+    await atualizarSenha(novaSenha);
+  }
+
   /// Reenvia o email de confirmação de cadastro (apoio à US 4.2).
   Future<void> reenviarConfirmacao(String email) async {
     if (!emailInstitucionalValido(email)) {

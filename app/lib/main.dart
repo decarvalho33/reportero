@@ -10,6 +10,7 @@ import 'views/nova_senha_screen.dart';
 import 'views/admin/admin_dashboard_screen.dart';
 import 'views/profile_screen.dart';
 import 'views/minhas_denuncias_screen.dart';
+import 'views/trocar_senha_screen.dart';
 import 'views/admin/admin_users_screen.dart';
 
 /// Ponto de entrada principal do aplicativo, responsável por inicializar o Supabase e configurar a aplicação Flutter.
@@ -71,6 +72,7 @@ class _ReporteroAppState extends State<ReporteroApp> {
         '/admin': (context) => const AdminDashboardScreen(),
         '/perfil': (context) => const ProfileScreen(),
         '/minhas-denuncias': (context) => const MinhasDenunciasScreen(),
+        '/trocar-senha': (context) => const TrocarSenhaScreen(),
         '/admin/users': (context) => const AdminUsersScreen(),
       },
     );

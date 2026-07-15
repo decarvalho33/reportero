@@ -253,6 +253,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: () =>
                       Navigator.pushNamed(context, '/minhas-denuncias'),
                 ),
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.lock_outline, color: Color(0xFF37474F)),
+                  title: const Text('Trocar senha'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.pushNamed(context, '/trocar-senha'),
+                ),
               ],
             ],
           ),

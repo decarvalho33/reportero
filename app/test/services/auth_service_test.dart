@@ -121,6 +121,17 @@ void main() {
         throwsArgumentError,
       );
     });
+
+    // trocarSenha valida a nova senha antes de tentar reautenticar (sem
+    // Supabase inicializado, a validação precisa ocorrer antes de qualquer
+    // chamada de rede — mesmo raciocínio do teste de cadastrar/atualizarSenha
+    // acima).
+    test('trocarSenha rejeita nova senha abaixo do limite, sem tentar rede', () async {
+      await expectLater(
+        AuthService().trocarSenha(senhaAtual: 'senhaAntiga123', novaSenha: '12345'),
+        throwsArgumentError,
+      );
+    });
   });
 
   // Tabela de decisão. Condições: email válido, senha válida, nome
